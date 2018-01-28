@@ -1,7 +1,17 @@
+import io
+import os
 import discord
 import asyncio
 
 client = discord.Client()
+
+def get_current_directory():
+	print('trying to get current dir')
+	return os.getcwd()
+
+def load_text_from_file(path):
+	print('Reading API key from ' + path + '\n')
+	return open(path).read().strip()
 
 @client.event
 async def on_ready():
@@ -49,4 +59,4 @@ async def run_myroles(message):
 async def run_amiadmin(message):
 	await client.send_message(message.channel, message.author.server_permissions.administrator)
 
-client.run('YOUR_API_KEY.apikey')
+client.run(load_text_from_file(get_current_directory() + '\quartermaster.apikey'))
