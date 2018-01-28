@@ -52,10 +52,10 @@ async def run_shutdown(message):
 		await send_message(message.channel, 'Goodbye')
 		raise KeyboardInterrupt()
 	else:
-		await send_message(message.channel, 'Sorry, I can\'t let you do that ' + message.author.name + '.')
+		await send_message(message.channel, 'Sorry, I can\'t let you do that ' + message.author.mention + '.')
 
 async def run_hello(message):
-	await send_message(message.channel, 'Hello to you too, ' + message.author.name + '!')
+	await send_message(message.channel, 'Hello to you too, ' + message.author.mention + '!')
 
 async def run_myroles(message):
 	roles_textified = 'Your roles:'
