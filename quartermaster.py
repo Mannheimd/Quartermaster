@@ -6,7 +6,6 @@ import asyncio
 client = discord.Client()
 
 def get_current_directory():
-	print('trying to get current dir')
 	return os.getcwd()
 
 def load_text_from_file(path):
