@@ -220,4 +220,4 @@ pip-log.txt
 ## API Keys
 #############
 
-*.apikey
+*.key
