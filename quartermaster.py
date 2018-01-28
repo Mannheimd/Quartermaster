@@ -11,13 +11,10 @@ import discord
 client = discord.Client()
 
 
-def get_current_directory():
-    return os.getcwd()
-
-
 def load_text_from_file(path):
     print(time_now() + ' - Reading API key from ' + path + '\n')
-    return open(path).read().strip()
+    with open(path, 'r') as file:
+        return file.read().strip()
 
 
 def time_now():
@@ -104,4 +101,4 @@ async def run_lightthebeacons(message):
     await send_message(message.channel, 'I\'m sorry ' + message.author.mention + ', I can\'t find a role called \'' + argument + '\'.')
 
 
-client.run(load_text_from_file(get_current_directory() + '\quartermaster.apikey'))
+client.run(load_text_from_file('quartermaster.apikey'))
