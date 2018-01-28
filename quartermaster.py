@@ -49,4 +49,4 @@ async def run_myroles(message):
 async def run_amiadmin(message):
 	await client.send_message(message.channel, message.author.server_permissions.administrator)
 
-client.run('api_key')
+client.run('YOUR_API_KEY.apikey')
