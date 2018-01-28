@@ -46,6 +46,9 @@ async def command_center(command, message):
 		
 	if command == '?amiadmin':
 		await run_amiadmin(message)
+		
+	if command == '?lightthebeacons':
+		await run_lightthebeacons(message)
 
 async def run_shutdown(message):
 	if message.author.server_permissions.administrator:
@@ -65,5 +68,24 @@ async def run_myroles(message):
 	
 async def run_amiadmin(message):
 	await send_message(message.channel, str(message.author.server_permissions.administrator))
+	
+async def run_lightthebeacons(message):
+	try:
+		argument = message.content.split(' ', 1)[1].strip('@')
+	except:
+		await send_message(message.channel, 'I\'m sorry ' + message.author.mention + ', I couldn\'t see a valid role. To light the beacons, use `?lightthebeacons RoleName` without the @ sign on the role. Example: `?lightthebeacons Overwatchers`')
+		return
+
+	for role in message.server.roles:
+		if role.name.lower() == argument.lower():
+			if role.mentionable:
+				await client.delete_message(message)
+				await send_message(message.channel, 'The beacons are lit! ' + role.mention + ' , will you come to ' + message.author.mention + '\'s aid?')
+				return
+			else:
+				await send_message(message.channel, 'I\'m sorry ' + message.author.mention + ', that role can\'t be @mentioned.')
+				return
+
+	await send_message(message.channel, 'I\'m sorry ' + message.author.mention + ', I can\'t find a role called \'' + argument + '\'.')
 
 client.run(load_text_from_file(get_current_directory() + '\quartermaster.apikey'))
