@@ -13,12 +13,13 @@ import discord
 class Client(discord.Client):
     """Quatermaster client."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, logger=logging.getLogger(), *args, **kwargs):
+        self.log = logger
         super().__init__(*args, **kwargs)
 
     async def send_message(self, destination, content=None, *, tts=False, embed=None):
         if content is not None:
-            print(time_now(), '- Sending message to', f'#{destination}:', content)
+            self.log.info('Sending message to #%s: %s', destination, content)
         await super().send_message(destination, content, tts=tts, embed=embed)
 
 
@@ -32,14 +33,14 @@ def time_now():
 
 @client.event
 async def on_ready():
-    print(time_now(), '- Logged in as:', client.user.name, f'({client.user.id})')
+    client.log.info('Logged in as: %s (%s)', client.user.name, client.user.id)
 
 
 @client.event
 async def on_message(message):
     if message.content.startswith('?'):
         command = message.content.split(' ', 1)[0]
-        print(time_now(), '- User: ', message.author.name, f'({message.author.id})', 'sent:', message.content)
+        client.log.info('User: %s (%s) sent: %s', message.author.name, message.author.id, message.content)
         await command_center(command, message)
 
 
@@ -142,16 +143,15 @@ def run(*args):
 
     args = parser.parse_args(args)
 
-    # get verbosity 'Enum'
-    args.verbosity = getattr(logging, args.verbosity.upper())
-    args.log_file_verbosity = getattr(logging, args.log_file_verbosity.upper())
-
-
 
     # create logger
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
     fmt = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+    # get verbosity 'Enum'
+    args.verbosity = getattr(logging, args.verbosity.upper())
+    args.log_file_verbosity = getattr(logging, args.log_file_verbosity.upper())
 
     # with stream (console) handle
     ch = logging.StreamHandler()
@@ -166,15 +166,17 @@ def run(*args):
         fh.setFormatter(fmt)
         logger.addHandler(fh)
 
+    # inject logger into client
+    client.log = logger
 
     args.token_file = os.path.abspath(args.token_file)
     if args.token is None:
         try:
             with open(args.token_file, 'r') as file:
-                print(time_now(), '- Reading API key from', args.token_file)
+                client.log.info('Reading API key from %s', args.token_file)
                 args.token = file.read().strip()
         except FileNotFoundError:
-            print(time_now(), '- Error: ', args.token_file, 'cannot be found; please indicate a token.')
+            client.log.error('%s cannot be found; please indicate a token.', args.token_file)
             parser.print_help()
             exit(errno.ENOENT)
 
