@@ -3,6 +3,7 @@
 import argparse
 import asyncio
 import datetime
+import errno
 import io
 import os
 
@@ -28,9 +29,14 @@ def time_now():
 
 
 if args.token is None:
-    with open(args.token_file, 'r') as file:
-        print(time_now() + ' - Reading API key from ' + args.token_file + '\n')
-        args.token = file.read().strip()
+    try:
+        with open(args.token_file, 'r') as file:
+            print(time_now() + ' - Reading API key from ' + args.token_file + '\n')
+            args.token = file.read().strip()
+    except FileNotFoundError:
+        print(time_now() + ' - Error: \'' + args.token_file + '\' cannot be found; please indicate a token.\n')
+        parser.print_help()
+        exit(errno.ENOENT)
 
 
 client = discord.Client()
