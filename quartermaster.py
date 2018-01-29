@@ -4,6 +4,7 @@ import argparse
 import datetime
 import errno
 import sys
+import os
 
 import discord
 
@@ -118,6 +119,7 @@ def run(*args):
 
     args = parser.parse_args(args)
 
+    args.token_file = os.path.abspath(args.token_file)
     if args.token is None:
         try:
             with open(args.token_file, 'r') as file:
