@@ -129,11 +129,10 @@ def run(*args):
     args = parser.parse_args(args)
 
 
-
     # create logger
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
-    fmt = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    fmt = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
     # with file handle
     fh = logging.FileHandler('test.log', mode='a')
@@ -141,7 +140,7 @@ def run(*args):
     fh.setFormatter(fmt)
     logger.addHandler(fh)
 
-    # with console handle
+    # with stream (console) handle
     ch = logging.StreamHandler()
     ch.setLevel(logging.ERROR)
     ch.setFormatter(fmt)
