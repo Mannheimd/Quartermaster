@@ -43,16 +43,16 @@ async def command_center(command, message):
     if command == '?shutdown':
         await run_shutdown(message)
 
-    if command == '?hello':
+    elif command == '?hello':
         await run_hello(message)
 
-    if command == '?myroles':
+    elif command == '?myroles':
         await run_myroles(message)
 
-    if command == '?amiadmin':
+    elif command == '?amiadmin':
         await run_amiadmin(message)
 
-    if command == '?lightthebeacons':
+    elif command == '?lightthebeacons':
         await run_lightthebeacons(message)
 
 
