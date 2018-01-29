@@ -34,7 +34,7 @@ async def on_ready():
 @client.event
 async def on_message(message):
     if message.content.startswith('?'):
-        command = message.content.split(' ', 1)[0]
+        command, *_ = message.content.partition(' ')
         client.log.info('User: %s (%s) sent: %s', message.author.name, message.author.id, message.content)
         await command_center(command, message)
 
@@ -85,7 +85,7 @@ async def run_amiadmin(message):
 
 async def run_lightthebeacons(message):
     try:
-        argument = message.content.split(' ', 1)[1].strip('@')
+        *_, argument = message.content.partition(' ')
     except:
         await client.send_message(
                 message.channel,
