@@ -126,7 +126,26 @@ def run(*args):
                              action='store', type=str, default='api.key',
                              help='File which contains API Token; default: api.key')
 
+    logging_group = parser.add_argument_group(
+            title='logging',
+            description='There are various levels of logging, in order of verbosity: '
+                        'critical, error, warning, info, debug, noset.')
+    logging_group.add_argument('-v', '--verbosity',
+                               action='store', type=str, default='error',
+                               help='Set verbosity for console output; default: error')
+    logging_group.add_argument('-l', '--log-file',
+                               action='store', type=str,
+                               help='File to log bot status. Not used by default.')
+    logging_group.add_argument('-vv', '--log-file-verbosity',
+                               action='store', type=str, default='debug',
+                               help='Set log file verbosity; default: debug')
+
     args = parser.parse_args(args)
+
+    # get verbosity 'Enum'
+    args.verbosity = getattr(logging, args.verbosity.upper())
+    args.log_file_verbosity = getattr(logging, args.log_file_verbosity.upper())
+
 
 
     # create logger
@@ -134,17 +153,18 @@ def run(*args):
     logger.setLevel(logging.DEBUG)
     fmt = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
-    # with file handle
-    fh = logging.FileHandler('test.log', mode='a')
-    fh.setLevel(logging.DEBUG)
-    fh.setFormatter(fmt)
-    logger.addHandler(fh)
-
     # with stream (console) handle
     ch = logging.StreamHandler()
-    ch.setLevel(logging.ERROR)
+    ch.setLevel(args.verbosity)
     ch.setFormatter(fmt)
     logger.addHandler(ch)
+
+    # optionally with file handle
+    if args.log_file:
+        fh = logging.FileHandler(args.log_file, mode='a')
+        fh.setLevel(args.log_file_verbosity)
+        fh.setFormatter(fmt)
+        logger.addHandler(fh)
 
 
     args.token_file = os.path.abspath(args.token_file)
