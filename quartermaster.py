@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import argparse
-import datetime
 import errno
 import logging
 import sys
@@ -25,10 +24,6 @@ class Client(discord.Client):
 
 # module level client
 client = Client()
-
-
-def time_now():
-    return datetime.datetime.now().time()
 
 
 @client.event
