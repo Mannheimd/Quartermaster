@@ -1,24 +1,45 @@
 #!/usr/bin/env python3
 
+import argparse
 import asyncio
 import datetime
+import errno
 import io
 import os
 
 import discord
 
 
-client = discord.Client()
+parser = argparse.ArgumentParser(
+        description='The "Solitude Of War" Discord Bot')
 
+token_group = parser.add_mutually_exclusive_group()
+token_group.add_argument('-t', '--token',
+                         action='store', type=str,
+                         help='API Token')
+token_group.add_argument('-f', '--token-file',
+                         action='store', type=str, default='api.key',
+                         help='File which contains API Token; default: api.key')
 
-def load_text_from_file(path):
-    print(time_now() + ' - Reading API key from ' + path + '\n')
-    with open(path, 'r') as file:
-        return file.read().strip()
+args = parser.parse_args()
 
 
 def time_now():
     return str(datetime.datetime.now().time())
+
+
+if args.token is None:
+    try:
+        with open(args.token_file, 'r') as file:
+            print(time_now() + ' - Reading API key from ' + args.token_file + '\n')
+            args.token = file.read().strip()
+    except FileNotFoundError:
+        print(time_now() + ' - Error: \'' + args.token_file + '\' cannot be found; please indicate a token.\n')
+        parser.print_help()
+        exit(errno.ENOENT)
+
+
+client = discord.Client()
 
 
 @client.event
@@ -101,4 +122,4 @@ async def run_lightthebeacons(message):
     await send_message(message.channel, 'I\'m sorry ' + message.author.mention + ', I can\'t find a role called \'' + argument + '\'.')
 
 
-client.run(load_text_from_file('quartermaster.apikey'))
+client.run(args.token)
