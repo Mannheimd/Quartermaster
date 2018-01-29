@@ -25,7 +25,7 @@ args = parser.parse_args(args)
 
 
 def time_now():
-    return str(datetime.datetime.now().time())
+    return datetime.datetime.now().time()
 
 
 if args.token is None:
@@ -97,7 +97,11 @@ async def run_myroles(message):
 
 
 async def run_amiadmin(message):
-    await send_message(message.channel, str(message.author.server_permissions.administrator))
+    msg = f'Sorry {message.author.mention}, you *are not* an admin'
+    if message.author.server_permissions.administrator:
+        msg = f'Indeed {message.author.mention}, you *are* an admin'
+
+    await send_message(message.channel, msg)
 
 
 async def run_lightthebeacons(message):
