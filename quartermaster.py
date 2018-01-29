@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 
 import argparse
-import asyncio
 import datetime
 import errno
-import io
-import os
 import sys
 
 import discord
