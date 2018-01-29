@@ -1,0 +1,11 @@
+# Python
+
+*.py[cod]
+
+# API Keys
+
+*.key
+
+# General
+
+*.log
