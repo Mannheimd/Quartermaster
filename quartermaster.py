@@ -6,40 +6,17 @@ import datetime
 import errno
 import io
 import os
+import sys
 
 import discord
 
 
-parser = argparse.ArgumentParser(
-        description='The "Solitude Of War" Discord Bot')
-
-token_group = parser.add_mutually_exclusive_group()
-token_group.add_argument('-t', '--token',
-                         action='store', type=str,
-                         help='API Token')
-token_group.add_argument('-f', '--token-file',
-                         action='store', type=str, default='api.key',
-                         help='File which contains API Token; default: api.key')
-
-args = parser.parse_args(args)
+# module level client
+client = discord.Client()
 
 
 def time_now():
     return datetime.datetime.now().time()
-
-
-if args.token is None:
-    try:
-        with open(args.token_file, 'r') as file:
-            print(time_now(), '- Reading API key from', args.token_file)
-            args.token = file.read().strip()
-    except FileNotFoundError:
-        print(time_now(), '- Error: ', args.token_file, 'cannot be found; please indicate a token.')
-        parser.print_help()
-        exit(errno.ENOENT)
-
-
-client = discord.Client()
 
 
 @client.event
@@ -128,4 +105,34 @@ async def run_lightthebeacons(message):
     await send_message(message.channel, f"I'm sorry {message.author.mention}, I can't find a role called '{argument}'.")
 
 
-client.run(args.token)
+def run(*args):
+    """Run the module level client."""
+
+    parser = argparse.ArgumentParser(
+            description='The "Solitude Of War" Discord Bot')
+
+    token_group = parser.add_mutually_exclusive_group()
+    token_group.add_argument('-t', '--token',
+                             action='store', type=str,
+                             help='API Token')
+    token_group.add_argument('-f', '--token-file',
+                             action='store', type=str, default='api.key',
+                             help='File which contains API Token; default: api.key')
+
+    args = parser.parse_args(args)
+
+    if args.token is None:
+        try:
+            with open(args.token_file, 'r') as file:
+                print(time_now(), '- Reading API key from', args.token_file)
+                args.token = file.read().strip()
+        except FileNotFoundError:
+            print(time_now(), '- Error: ', args.token_file, 'cannot be found; please indicate a token.')
+            parser.print_help()
+            exit(errno.ENOENT)
+
+    client.run(args.token)
+
+
+if __name__ == '__main__':
+    run(*sys.argv[1:])
