@@ -55,6 +55,9 @@ async def command_center(command, message):
     elif command == '?lightthebeacons':
         await run_lightthebeacons(message)
 
+    elif command == '?gentlypats':
+        await run_gentlypats(message)
+
 
 async def run_shutdown(message):
     if message.author.server_permissions.administrator:
@@ -106,6 +109,10 @@ async def run_lightthebeacons(message):
                 return
 
     await client.send_message(message.channel, f"I'm sorry {message.author.mention}, I can't find a role called '{argument}'.")
+
+
+async def run_gentlypats(message):
+    await client.send_message(message.channel, '*purrs*')
 
 
 def run(*args):
