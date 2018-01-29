@@ -3,6 +3,7 @@
 import argparse
 import datetime
 import errno
+import logging
 import sys
 import os
 
@@ -126,6 +127,26 @@ def run(*args):
                              help='File which contains API Token; default: api.key')
 
     args = parser.parse_args(args)
+
+
+
+    # create logger
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    fmt = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+    # with file handle
+    fh = logging.FileHandler('test.log', mode='a')
+    fh.setLevel(logging.DEBUG)
+    fh.setFormatter(fmt)
+    logger.addHandler(fh)
+
+    # with console handle
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.ERROR)
+    ch.setFormatter(fmt)
+    logger.addHandler(ch)
+
 
     args.token_file = os.path.abspath(args.token_file)
     if args.token is None:
