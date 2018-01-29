@@ -19,7 +19,7 @@ def time_now():
 
 @client.event
 async def on_ready():
-    print(time_now(), '- Logged in as:', client.user.name, client.user.id)
+    print(time_now(), '- Logged in as:', client.user.name, f'({client.user.id})')
 
 
 @client.event
