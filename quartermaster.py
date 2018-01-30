@@ -200,8 +200,8 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
                              help='File which contains API Token. (default: api.key)')
 
 
-    logging_levels = {lvl: getattr(logging, lvl.upper())
-                      for lvl in ('critical', 'error', 'warning', 'info', 'debug')}
+    logging_levels = OrderedDict((lvl, getattr(logging, lvl.upper()))
+                                 for lvl in ('critical', 'error', 'warning', 'info', 'debug'))
     logging_group = parser.add_argument_group(
             title='logging',
             description='There are various levels of logging, in order of verbosity.')
@@ -223,7 +223,7 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
     if args.config_files is not None:
         args.config_files = tuple(flatten(args.config_files, default_args['config_files']))
 
-    combined_args = ChainMap({k: v for k, v in vars(args).items() if v is not None})
+    combined_args = ChainMap({}, {k: v for k, v in vars(args).items() if v is not None})
 
     def load_config_file(config_file):
         with open(config_file, 'r') as file:
