@@ -53,6 +53,20 @@ class Client(discord.Client):
         await super().send_message(destination, content, tts=tts, embed=embed)
 
 
+def find(pred, iterable):
+    """
+    Find the first occurance of the predicate function returning true over the iterable; otherwise None.
+    >>> find(lambda e: e.startswith('g'), ['alpha', 'beta', 'gamma', 'delta'])
+    'gamma'
+    >>> find(lambda e: e.startswith('p'), ['alpha', 'beta', 'gamma', 'delta'])
+    None
+    """
+
+    for element in iterable:
+        if pred(element):
+            return element
+
+
 # module level client
 client = Client()
 
@@ -117,7 +131,7 @@ async def run_amiadmin(message):
 
 async def run_lightthebeacons(message):
     try:
-        *_, argument = message.content.partition(' ')
+        *_, rolename = message.content.partition(' ')
     except:
         await client.send_message(
                 message.channel,
@@ -126,18 +140,19 @@ async def run_lightthebeacons(message):
                 'Example: `?lightthebeacons Overwatchers`')
         return
 
-    for role in message.server.roles:
-        if role.name.lower() == argument.lower():
-            if role.mentionable:
-                await client.delete_message(message)
-                await client.send_message(message.channel,
-                                   f"The beacons are lit! {role.mention}, will you come to {message.author.mention}'s aid?")
-                return
-            else:
-                await client.send_message(message.channel, f"I'm sorry {message.author.mention}, that role can't be @mentioned.")
-                return
+    role = find(lambda r: rolename == r.name, message.server.roles)
+    if role is None:
+        await client.send_message(message.channel, f"I'm sorry {message.author.mention}, I can't find a role called '{rolename}'.")
+        return
 
-    await client.send_message(message.channel, f"I'm sorry {message.author.mention}, I can't find a role called '{argument}'.")
+    if not role.mentionable:
+        await client.send_message(message.channel, f"I'm sorry {message.author.mention}, that role can't be @mentioned.")
+        return
+
+    await client.delete_message(message)
+    await client.send_message(
+            message.channel,
+            f"The beacons are lit! {role.mention}, will you come to {message.author.mention}'s aid?")
 
 
 async def run_gentlypats(message):
