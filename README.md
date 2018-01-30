@@ -15,11 +15,11 @@ The "Solitude Of War" Discord Bot
 optional arguments:
   -h, --help            show this help message and exit
   -f [CONFIG_FILES [CONFIG_FILES ...]], --config-files [CONFIG_FILES [CONFIG_FILES ...]]
-                        Configuration file(s) containing commandline arguments
-                        in JSON format; e.g.,'
+                        Configuration file(s) containing command line
+                        arguments in JSON format; e.g.,'
                             {
-                                "token_file": "quatermaster.key",
-                                "log_file": "quatermaster.log",
+                                "token_file": "quartermaster.key",
+                                "log_file": "quartermaster.log",
                                 "verbosity": "warning"
                             }
                                                 (default: config.json)

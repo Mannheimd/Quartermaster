@@ -41,7 +41,7 @@ class HelpFormatter(argparse.RawDescriptionHelpFormatter):
 
 
 class Client(discord.Client):
-    """Quatermaster client."""
+    """Quartermaster client."""
 
     def __init__(self, logger=logging.getLogger(), *args, **kwargs):
         self.log = logger
@@ -55,7 +55,7 @@ class Client(discord.Client):
 
 def find(pred, iterable):
     """
-    Find the first occurance of the predicate function returning true over the iterable; otherwise None.
+    Find the first occurrence of the predicate function returning true over the iterable; otherwise None.
     >>> find(lambda e: e.startswith('g'), ['alpha', 'beta', 'gamma', 'delta'])
     'gamma'
     >>> find(lambda e: e.startswith('p'), ['alpha', 'beta', 'gamma', 'delta'])
@@ -109,7 +109,7 @@ async def run_shutdown(message):
         await client.send_message(message.channel, 'Goodbye')
         raise KeyboardInterrupt()
     else:
-        await client.log.warn(f'{message.author} attempted to shutdown Quatermaster')
+        await client.log.warn(f'{message.author} attempted to shutdown Quartermaster')
         await client.send_message(message.channel, f'Sorry {message.author.mention}, I cannot let you do that.')
 
 
@@ -182,10 +182,10 @@ def run(*args, **kwargs):
     parser.add_argument('-f', '--config-files',
                         action='append', type=str, nargs='*',
                         help=f"""
-Configuration file(s) containing commandline arguments in JSON format; e.g.,'
+Configuration file(s) containing command line arguments in JSON format; e.g.,'
     {{
-        "token_file": "quatermaster.key",
-        "log_file": "quatermaster.log",
+        "token_file": "quartermaster.key",
+        "log_file": "quartermaster.log",
         "verbosity": "warning"
     }}
                         (default: {default_args['config_files']})""")
