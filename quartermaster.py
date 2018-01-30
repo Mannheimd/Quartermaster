@@ -1,12 +1,36 @@
 #!/usr/bin/env python3
 
 import argparse
+from collections import ChainMap, OrderedDict
 import errno
+import itertools as it
+import json
 import logging
 import sys
 import os
 
 import discord
+
+
+def flatten(iter_of_iters, fillvalue=None):
+    """
+    Flatten one level of nesting.
+    [ [A, B], [C, D], [E, F, G] ] ==> [A, B, C, D, E, F, G]
+
+    in the case of `fillvalue is not None`
+    [ [A, B], [], [C, D, E] ] ==> [A, B, X, C, D, E]
+        where fillvalue=X
+    """
+
+    if fillvalue is None:
+        for element in it.chain.from_iterable(iter_of_iters):
+            yield element
+    else:
+        for itr in iter_of_iters:
+            if not itr:
+                yield fillvalue
+            for element in itr:
+                yield element
 
 
 class Client(discord.Client):
@@ -113,36 +137,88 @@ async def run_gentlypats(message):
     await client.send_message(message.channel, '*purrs*')
 
 
-def run(*args):
+def run(*args, **kwargs):
     """Run the module level client."""
+
+    default_args = {
+            'config_files': 'config.json',
+            'verbosity': 'error',
+            'log_file_verbosity': 'debug',
+            }
 
     parser = argparse.ArgumentParser(
             description='The "Solitude Of War" Discord Bot')
+
+    parser.add_argument('-f', '--config-files',
+                        action='append', type=str, nargs='*',
+                        help=f"""
+Configuration file(s) containing commandline arguments in JSON format; e.g.,'
+    {{
+        "token_file": "quatermaster.key",
+        "log_file": "quatermaster.log",
+        "verbosity": "warning"
+    }}
+                        ; default: config.json""")
+
 
     token_group = parser.add_mutually_exclusive_group()
     token_group.add_argument('-t', '--token',
                              action='store', type=str,
                              help='API Token')
-    token_group.add_argument('-f', '--token-file',
-                             action='store', type=str, default='api.key',
+    token_group.add_argument('-tf', '--token-file',
+                             action='store', type=str, nargs='?', const='api.key',
                              help='File which contains API Token; default: api.key')
 
+
+    logging_levels = {lvl: getattr(logging, lvl.upper())
+                      for lvl in ('critical', 'error', 'warning', 'info', 'debug')}
     logging_group = parser.add_argument_group(
             title='logging',
-            description='There are various levels of logging, in order of verbosity: '
-                        'critical, error, warning, info, debug, noset.')
+            description='There are various levels of logging, in order of verbosity.')
     logging_group.add_argument('-v', '--verbosity',
-                               action='store', type=str, default='error',
+                               action='store', type=str, choices=logging_levels,
                                help='Set verbosity for console output; default: error')
     logging_group.add_argument('-l', '--log-file',
-                               action='store', type=str,
-                               help='File to log bot status. Not used by default.')
-    logging_group.add_argument('-vv', '--log-file-verbosity',
-                               action='store', type=str, default='debug',
+                               action='store', type=str, nargs='?', const='server.log',
+                               help='File to log bot status; default: server.log')
+    logging_group.add_argument('-lv', '--log-file-verbosity',
+                               action='store', type=str, choices=logging_levels,
                                help='Set log file verbosity; default: debug')
 
+
+    parser.set_defaults(**kwargs)
     args = parser.parse_args(args)
 
+    # flatten any given configuration files
+    if args.config_files is not None:
+        args.config_files = tuple(flatten(args.config_files, default_args['config_files']))
+
+    combined_args = ChainMap({k: v for k, v in vars(args).items() if v is not None})
+
+    def load_config_file(config_file):
+        with open(config_file, 'r') as file:
+            return json.load(file)
+
+    def recurse_config_files(cfg, file_map):
+        files = cfg.get('config_files')
+        if files is None:
+            return
+        for file in files:
+            if file is not None and file not in file_map:
+                cfg = load_config_file(file)
+                file_map[file] = cfg
+                recurse_config_files(cfg,  file_map)
+
+    # recurse the tree and include configures in order of given precedence
+    file_map = OrderedDict()
+    recurse_config_files(combined_args, file_map)
+    combined_args.maps.extend(file_map.values())
+    combined_args.update(config_files=file_map.keys())
+    combined_args.maps.append(default_args)
+    combined_args.maps.append(vars(parser.parse_args([])))
+
+    # flatten configuration into most precedence for each argument into given API
+    args = argparse.Namespace(**combined_args)
 
     # create logger
     logger = logging.getLogger(__name__)
@@ -150,8 +226,8 @@ def run(*args):
     fmt = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
     # get verbosity 'Enum'
-    args.verbosity = getattr(logging, args.verbosity.upper())
-    args.log_file_verbosity = getattr(logging, args.log_file_verbosity.upper())
+    args.verbosity = logging_levels[args.verbosity]
+    args.log_file_verbosity = logging_levels[args.log_file_verbosity]
 
     # with stream (console) handle
     ch = logging.StreamHandler()
@@ -169,8 +245,12 @@ def run(*args):
     # inject logger into client
     client.log = logger
 
-    args.token_file = os.path.abspath(args.token_file)
     if args.token is None:
+        if args.token_file is None:
+            client.log.error(f'No token or token file provided; please indicate a token.')
+            parser.print_help()
+            exit(errno.EACCES)
+        args.token_file = os.path.abspath(args.token_file)
         try:
             with open(args.token_file, 'r') as file:
                 client.log.info(f'Reading API key from {args.token_file}')
