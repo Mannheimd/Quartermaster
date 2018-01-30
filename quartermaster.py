@@ -142,7 +142,6 @@ def run(*args, **kwargs):
 
     default_args = {
             'config_files': 'config.json',
-            'token_file': 'api.key',
             'verbosity': 'error',
             'log_file_verbosity': 'debug',
             }
@@ -167,7 +166,7 @@ Configuration file(s) containing commandline arguments in JSON format; e.g.,'
                              action='store', type=str,
                              help='API Token')
     token_group.add_argument('-tf', '--token-file',
-                             action='store', type=str,
+                             action='store', type=str, nargs='?', const='api.key',
                              help='File which contains API Token; default: api.key')
 
     logging_group = parser.add_argument_group(
@@ -244,8 +243,12 @@ Configuration file(s) containing commandline arguments in JSON format; e.g.,'
     # inject logger into client
     client.log = logger
 
-    args.token_file = os.path.abspath(args.token_file)
     if args.token is None:
+        if args.token_file is None:
+            client.log.error(f'No token or token file provided; please indicate a token.')
+            parser.print_help()
+            exit(errno.EACCES)
+        args.token_file = os.path.abspath(args.token_file)
         try:
             with open(args.token_file, 'r') as file:
                 client.log.info(f'Reading API key from {args.token_file}')
