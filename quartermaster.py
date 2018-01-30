@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
-from collections import ChainMap
+from collections import ChainMap, OrderedDict
 import errno
 import json
 import logging
@@ -171,11 +171,18 @@ Configuration file containing commandline arguments in JSON format; e.g.,'
         with open(config_file, 'r') as file:
             return json.load(file)
 
-    if args.config_file is not None:
-        cfg = load_config_file(args.config_file)
-        combined_args.maps.append(cfg)
+    def recurse_config_files(cfg, files):
+        file = cfg.get('config_file')
+        if file is not None and file not in files:
+            cfg = load_config_file(file)
+            files[file] = cfg
+            recurse_config_files(cfg,  files)
 
+    files = OrderedDict()
+    recurse_config_files(combined_args, files)
+    combined_args.maps.extend(files.values())
     combined_args.maps.append(default_args)
+
     args = argparse.Namespace(**combined_args)
 
     # create logger
