@@ -120,11 +120,23 @@ def run(*args):
     parser = argparse.ArgumentParser(
             description='The "Solitude Of War" Discord Bot')
 
+    parser.add_argument('-f', '--config-file',
+                        action='store', type=str, default='config.json',
+                        help="""
+Configuration file containing commandline arguments in JSON format; e.g.,'
+    {
+        "token_file": "quatermaster.key",
+        "log_file": "quatermaster.log",
+        "verbosity": "warning"
+    }
+                        ; default: config.json""")
+
+
     token_group = parser.add_mutually_exclusive_group()
     token_group.add_argument('-t', '--token',
                              action='store', type=str,
                              help='API Token')
-    token_group.add_argument('-f', '--token-file',
+    token_group.add_argument('-tf', '--token-file',
                              action='store', type=str, default='api.key',
                              help='File which contains API Token; default: api.key')
 
