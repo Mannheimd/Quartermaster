@@ -18,7 +18,7 @@ class Client(discord.Client):
 
     async def send_message(self, destination, content=None, *, tts=False, embed=None):
         if content is not None:
-            self.log.info('Sending message to #%s: %s', destination, content)
+            self.log.info(f'Sending message to #{destination}: {content}')
         await super().send_message(destination, content, tts=tts, embed=embed)
 
 
@@ -28,14 +28,14 @@ client = Client()
 
 @client.event
 async def on_ready():
-    client.log.info('Logged in as: %s (%s)', client.user.name, client.user.id)
+    client.log.info(f'Logged in as: {client.user.name} ({client.user.id})')
 
 
 @client.event
 async def on_message(message):
     if message.content.startswith('?'):
         command, *_ = message.content.partition(' ')
-        client.log.info('User: %s (%s) sent: %s', message.author.name, message.author.id, message.content)
+        client.log.info(f'User: {message.author.name} ({message.author.id}) sent: {message.content}')
         await command_center(command, message)
 
 
@@ -175,10 +175,10 @@ def run(*args):
     if args.token is None:
         try:
             with open(args.token_file, 'r') as file:
-                client.log.info('Reading API key from %s', args.token_file)
+                client.log.info(f'Reading API key from {args.token_file}')
                 args.token = file.read().strip()
         except FileNotFoundError:
-            client.log.error('%s cannot be found; please indicate a token.', args.token_file)
+            client.log.error(f'{args.token_file} cannot be found; please indicate a token.')
             parser.print_help()
             exit(errno.ENOENT)
 
