@@ -179,7 +179,7 @@ Configuration file(s) containing commandline arguments in JSON format; e.g.,'
     logging_group.add_argument('-l', '--log-file',
                                action='store', type=str, nargs='?', const='server.log',
                                help='File to log bot status; default: server.log')
-    logging_group.add_argument('-vv', '--log-file-verbosity',
+    logging_group.add_argument('-lv', '--log-file-verbosity',
                                action='store', type=str,
                                help='Set log file verbosity; default: debug')
 
