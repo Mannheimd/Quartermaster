@@ -117,19 +117,25 @@ async def run_gentlypats(message):
 def run(*args):
     """Run the module level client."""
 
+    cfg_parser = argparse.ArgumentParser(add_help=False)
+    cfg_parser.add_argument('-f', '--config-file',
+                           action='store', type=str, default='config.json')
+    cfg_args, args = cfg_parser.parse_known_args(args)
+
     parser = argparse.ArgumentParser(
             description='The "Solitude Of War" Discord Bot')
 
+    # noop, but for documentation
     parser.add_argument('-f', '--config-file',
-                        action='store', type=str, default='config.json',
-                        help="""
+                        action='store', type=str, default=cfg_parser.get_default('config_file'),
+                        help=f"""
 Configuration file containing commandline arguments in JSON format; e.g.,'
-    {
+    {{
         "token_file": "quatermaster.key",
         "log_file": "quatermaster.log",
         "verbosity": "warning"
-    }
-                        ; default: config.json""")
+    }}
+                        ; default: {cfg_parser.get_default('config_file')}""")
 
 
     token_group = parser.add_mutually_exclusive_group()
@@ -156,9 +162,9 @@ Configuration file containing commandline arguments in JSON format; e.g.,'
 
     # load defaults from file
     try:
-        with open('config.json', 'r') as file:
+        with open(cfg_args.config_file, 'r') as file:
             cfg = json.load(file)
-        parser.set_defaults(**cfg)
+        parser.set_defaults(**cfg, **cfg_args.__dict__)
     except FileNotFoundError:
         pass
 
