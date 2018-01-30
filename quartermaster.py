@@ -130,9 +130,8 @@ async def run_amiadmin(message):
 
 
 async def run_lightthebeacons(message):
-    try:
-        *_, rolename = message.content.partition(' ')
-    except:
+    *_, rolename = message.content.partition(' ')
+    if not rolename:
         await client.send_message(
                 message.channel,
                 f"I'm sorry {message.author.mention}, I couldn't see a valid role. "
