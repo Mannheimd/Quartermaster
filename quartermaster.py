@@ -117,9 +117,16 @@ async def run_gentlypats(message):
 def run(*args):
     """Run the module level client."""
 
+    default_args = {
+            'config_file': 'config.json',
+            'token_file': 'api.key',
+            'verbosity': 'error',
+            'log_file_verbosity': 'debug',
+            }
+
     cfg_parser = argparse.ArgumentParser(add_help=False)
     cfg_parser.add_argument('-f', '--config-file',
-                           action='store', type=str, default='config.json')
+                           action='store', type=str, default=default_args['config_file'])
     cfg_args, args = cfg_parser.parse_known_args(args)
 
     parser = argparse.ArgumentParser(
@@ -143,7 +150,7 @@ Configuration file containing commandline arguments in JSON format; e.g.,'
                              action='store', type=str,
                              help='API Token')
     token_group.add_argument('-tf', '--token-file',
-                             action='store', type=str, default='api.key',
+                             action='store', type=str, default=default_args['token_file'],
                              help='File which contains API Token; default: api.key')
 
     logging_group = parser.add_argument_group(
@@ -151,13 +158,13 @@ Configuration file containing commandline arguments in JSON format; e.g.,'
             description='There are various levels of logging, in order of verbosity: '
                         'critical, error, warning, info, debug, noset.')
     logging_group.add_argument('-v', '--verbosity',
-                               action='store', type=str, default='error',
+                               action='store', type=str, default=default_args['verbosity'],
                                help='Set verbosity for console output; default: error')
     logging_group.add_argument('-l', '--log-file',
                                action='store', type=str,
                                help='File to log bot status. Not used by default.')
     logging_group.add_argument('-vv', '--log-file-verbosity',
-                               action='store', type=str, default='debug',
+                               action='store', type=str, default=default_args['log_file_verbosity'],
                                help='Set log file verbosity; default: debug')
 
     # load defaults from file
