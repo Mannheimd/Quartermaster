@@ -34,6 +34,20 @@ def flatten(iter_of_iters, fillvalue=None):
                 yield element
 
 
+def find(pred, iterable):
+    """
+    Find the first occurrence of the predicate function returning true over the iterable; otherwise None.
+    >>> find(lambda e: e.startswith('g'), ['alpha', 'beta', 'gamma', 'delta'])
+    'gamma'
+    >>> find(lambda e: e.startswith('p'), ['alpha', 'beta', 'gamma', 'delta'])
+    None
+    """
+
+    for element in iterable:
+        if pred(element):
+            return element
+
+
 class HelpFormatter(argparse.RawDescriptionHelpFormatter):
     def _split_lines(self, text, width):
         lines = flatten(textwrap.wrap(t, width) for t in text.splitlines())
@@ -51,20 +65,6 @@ class Client(discord.Client):
         if content is not None:
             self.log.info(f'Sending message to #{destination}: {content}')
         await super().send_message(destination, content, tts=tts, embed=embed)
-
-
-def find(pred, iterable):
-    """
-    Find the first occurrence of the predicate function returning true over the iterable; otherwise None.
-    >>> find(lambda e: e.startswith('g'), ['alpha', 'beta', 'gamma', 'delta'])
-    'gamma'
-    >>> find(lambda e: e.startswith('p'), ['alpha', 'beta', 'gamma', 'delta'])
-    None
-    """
-
-    for element in iterable:
-        if pred(element):
-            return element
 
 
 # module level client
