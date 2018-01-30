@@ -7,6 +7,7 @@ import itertools as it
 import json
 import logging
 import sys
+import textwrap
 import os
 
 import discord
@@ -31,6 +32,12 @@ def flatten(iter_of_iters, fillvalue=None):
                 yield fillvalue
             for element in itr:
                 yield element
+
+
+class HelpFormatter(argparse.RawDescriptionHelpFormatter):
+    def _split_lines(self, text, width):
+        lines = flatten(textwrap.wrap(t, width) for t in text.splitlines())
+        return tuple(lines)
 
 
 class Client(discord.Client):
@@ -147,7 +154,8 @@ def run(*args, **kwargs):
             }
 
     parser = argparse.ArgumentParser(
-            description='The "Solitude Of War" Discord Bot')
+            description='The "Solitude Of War" Discord Bot',
+            formatter_class=HelpFormatter)
 
     parser.add_argument('-f', '--config-files',
                         action='append', type=str, nargs='*',
@@ -158,7 +166,7 @@ Configuration file(s) containing commandline arguments in JSON format; e.g.,'
         "log_file": "quatermaster.log",
         "verbosity": "warning"
     }}
-                        ; default: config.json""")
+                        (default: {default_args['config_files']})""")
 
 
     token_group = parser.add_mutually_exclusive_group()
@@ -167,7 +175,7 @@ Configuration file(s) containing commandline arguments in JSON format; e.g.,'
                              help='API Token')
     token_group.add_argument('-tf', '--token-file',
                              action='store', type=str, nargs='?', const='api.key',
-                             help='File which contains API Token; default: api.key')
+                             help='File which contains API Token. (default: api.key)')
 
 
     logging_levels = {lvl: getattr(logging, lvl.upper())
@@ -177,13 +185,13 @@ Configuration file(s) containing commandline arguments in JSON format; e.g.,'
             description='There are various levels of logging, in order of verbosity.')
     logging_group.add_argument('-v', '--verbosity',
                                action='store', type=str, choices=logging_levels,
-                               help='Set verbosity for console output; default: error')
+                               help=f'Set verbosity for console output. (default: {default_args["verbosity"]})')
     logging_group.add_argument('-l', '--log-file',
                                action='store', type=str, nargs='?', const='server.log',
-                               help='File to log bot status; default: server.log')
+                               help='File to log bot status. (default: server.log)')
     logging_group.add_argument('-lv', '--log-file-verbosity',
                                action='store', type=str, choices=logging_levels,
-                               help='Set log file verbosity; default: debug')
+                               help=f'Set log file verbosity. (default: {default_args["log_file_verbosity"]})')
 
 
     parser.set_defaults(**kwargs)
