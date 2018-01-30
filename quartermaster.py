@@ -180,7 +180,7 @@ def run(*args, **kwargs):
             formatter_class=HelpFormatter)
 
     parser.add_argument('-f', '--config-files',
-                        action='append', type=str, nargs='*',
+                        action='append', nargs='*',
                         help=f"""
 Configuration file(s) containing command line arguments in JSON format; e.g.,'
     {{
@@ -193,10 +193,9 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
 
     token_group = parser.add_mutually_exclusive_group()
     token_group.add_argument('-t', '--token',
-                             action='store', type=str,
                              help='API Token')
     token_group.add_argument('-tf', '--token-file',
-                             action='store', type=str, nargs='?', const='api.key',
+                             nargs='?', const='api.key',
                              help='File which contains API Token. (default: api.key)')
 
 
@@ -206,13 +205,13 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
             title='logging',
             description='There are various levels of logging, in order of verbosity.')
     logging_group.add_argument('-v', '--verbosity',
-                               action='store', type=str, choices=logging_levels,
+                               choices=logging_levels,
                                help=f'Set verbosity for console output. (default: {default_args["verbosity"]})')
     logging_group.add_argument('-l', '--log-file',
-                               action='store', type=str, nargs='?', const='server.log',
+                               nargs='?', const='server.log',
                                help='File to log bot status. (default: server.log)')
     logging_group.add_argument('-lv', '--log-file-verbosity',
-                               action='store', type=str, choices=logging_levels,
+                               choices=logging_levels,
                                help=f'Set log file verbosity. (default: {default_args["log_file_verbosity"]})')
 
 
