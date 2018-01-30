@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+from collections import ChainMap
 import errno
 import json
 import logging
@@ -161,16 +162,19 @@ Configuration file containing commandline arguments in JSON format; e.g.,'
                                action='store', type=str, default=default_args['log_file_verbosity'],
                                help='Set log file verbosity; default: debug')
 
+
+    args = parser.parse_args(args)
+    combined_args = ChainMap({k: v for k, v in vars(args).items() if v is not None})
+
     # load defaults from file
-    tmp_args = parser.parse_args(args)
     try:
-        with open(tmp_args.config_file, 'r') as file:
+        with open(args.config_file, 'r') as file:
             cfg = json.load(file)
-        parser.set_defaults(**cfg)
+            combined_args.maps.append(cfg)
     except FileNotFoundError:
         pass
 
-    args = parser.parse_args(args)
+    args = argparse.Namespace(**combined_args)
 
     # create logger
     logger = logging.getLogger(__name__)
