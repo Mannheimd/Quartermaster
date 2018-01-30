@@ -143,9 +143,12 @@ def run(*args):
                                help='Set log file verbosity; default: debug')
 
     # load defaults from file
-    with open('config.json', 'r') as file:
-        cfg = json.load(file)
-    parser.set_defaults(**cfg)
+    try:
+        with open('config.json', 'r') as file:
+            cfg = json.load(file)
+        parser.set_defaults(**cfg)
+    except FileNotFoundError:
+        pass
 
     args = parser.parse_args(args)
 
