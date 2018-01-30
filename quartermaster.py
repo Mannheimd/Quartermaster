@@ -7,6 +7,7 @@ import itertools as it
 import json
 import logging
 import sys
+import textwrap
 import os
 
 import discord
@@ -31,6 +32,12 @@ def flatten(iter_of_iters, fillvalue=None):
                 yield fillvalue
             for element in itr:
                 yield element
+
+
+class HelpFormatter(argparse.RawDescriptionHelpFormatter):
+    def _split_lines(self, text, width):
+        lines = flatten(textwrap.wrap(t, width) for t in text.splitlines())
+        return tuple(lines)
 
 
 class Client(discord.Client):
@@ -147,7 +154,8 @@ def run(*args, **kwargs):
             }
 
     parser = argparse.ArgumentParser(
-            description='The "Solitude Of War" Discord Bot')
+            description='The "Solitude Of War" Discord Bot',
+            formatter_class=HelpFormatter)
 
     parser.add_argument('-f', '--config-files',
                         action='append', type=str, nargs='*',
