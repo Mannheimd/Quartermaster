@@ -169,18 +169,20 @@ Configuration file(s) containing commandline arguments in JSON format; e.g.,'
                              action='store', type=str, nargs='?', const='api.key',
                              help='File which contains API Token; default: api.key')
 
+
+    logging_levels = {lvl: getattr(logging, lvl.upper())
+                      for lvl in ('critical', 'error', 'warning', 'info', 'debug')}
     logging_group = parser.add_argument_group(
             title='logging',
-            description='There are various levels of logging, in order of verbosity: '
-                        'critical, error, warning, info, debug, noset.')
+            description='There are various levels of logging, in order of verbosity.')
     logging_group.add_argument('-v', '--verbosity',
-                               action='store', type=str,
+                               action='store', type=str, choices=logging_levels,
                                help='Set verbosity for console output; default: error')
     logging_group.add_argument('-l', '--log-file',
                                action='store', type=str, nargs='?', const='server.log',
                                help='File to log bot status; default: server.log')
     logging_group.add_argument('-lv', '--log-file-verbosity',
-                               action='store', type=str,
+                               action='store', type=str, choices=logging_levels,
                                help='Set log file verbosity; default: debug')
 
 
@@ -224,8 +226,8 @@ Configuration file(s) containing commandline arguments in JSON format; e.g.,'
     fmt = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
     # get verbosity 'Enum'
-    args.verbosity = getattr(logging, args.verbosity.upper())
-    args.log_file_verbosity = getattr(logging, args.log_file_verbosity.upper())
+    args.verbosity = logging_levels[args.verbosity]
+    args.log_file_verbosity = logging_levels[args.log_file_verbosity]
 
     # with stream (console) handle
     ch = logging.StreamHandler()
