@@ -2,6 +2,7 @@
 
 import argparse
 import errno
+import json
 import logging
 import sys
 import os
@@ -141,8 +142,12 @@ def run(*args):
                                action='store', type=str, default='debug',
                                help='Set log file verbosity; default: debug')
 
-    args = parser.parse_args(args)
+    # load defaults from file
+    with open('config.json', 'r') as file:
+        cfg = json.load(file)
+    parser.set_defaults(**cfg)
 
+    args = parser.parse_args(args)
 
     # create logger
     logger = logging.getLogger(__name__)
