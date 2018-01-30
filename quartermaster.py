@@ -3,12 +3,34 @@
 import argparse
 from collections import ChainMap, OrderedDict
 import errno
+import itertools as it
 import json
 import logging
 import sys
 import os
 
 import discord
+
+
+def flatten(iter_of_iters, fillvalue=None):
+    """
+    Flatten one level of nesting.
+    [ [A, B], [C, D], [E, F, G] ] ==> [A, B, C, D, E, F, G]
+
+    in the case of `fillvalue is not None`
+    [ [A, B], [], [C, D, E] ] ==> [A, B, X, C, D, E]
+        where fillvalue=X
+    """
+
+    if fillvalue is None:
+        for element in it.chain.from_iterable(iter_of_iters):
+            yield element
+    else:
+        for itr in iter_of_iters:
+            if not itr:
+                yield fillvalue
+            for element in itr:
+                yield element
 
 
 class Client(discord.Client):
@@ -119,6 +141,7 @@ def run(*args, **kwargs):
     """Run the module level client."""
 
     default_args = {
+            'config_files': 'config.json',
             'token_file': 'api.key',
             'verbosity': 'error',
             'log_file_verbosity': 'debug',
@@ -127,11 +150,10 @@ def run(*args, **kwargs):
     parser = argparse.ArgumentParser(
             description='The "Solitude Of War" Discord Bot')
 
-    parser.add_argument('-f', '--config-file',
-                        action='store', type=str,
-                        nargs='?', const='config.json',
+    parser.add_argument('-f', '--config-files',
+                        action='append', type=str, nargs='*',
                         help=f"""
-Configuration file containing commandline arguments in JSON format; e.g.,'
+Configuration file(s) containing commandline arguments in JSON format; e.g.,'
     {{
         "token_file": "quatermaster.key",
         "log_file": "quatermaster.log",
@@ -165,24 +187,36 @@ Configuration file containing commandline arguments in JSON format; e.g.,'
 
     parser.set_defaults(**kwargs)
     args = parser.parse_args(args)
+
+    # flatten any given configuration files
+    if args.config_files is not None:
+        args.config_files = tuple(flatten(args.config_files, default_args['config_files']))
+
     combined_args = ChainMap({k: v for k, v in vars(args).items() if v is not None})
 
     def load_config_file(config_file):
         with open(config_file, 'r') as file:
             return json.load(file)
 
-    def recurse_config_files(cfg, files):
-        file = cfg.get('config_file')
-        if file is not None and file not in files:
-            cfg = load_config_file(file)
-            files[file] = cfg
-            recurse_config_files(cfg,  files)
+    def recurse_config_files(cfg, file_map):
+        files = cfg.get('config_files')
+        if files is None:
+            return
+        for file in files:
+            if file is not None and file not in file_map:
+                cfg = load_config_file(file)
+                file_map[file] = cfg
+                recurse_config_files(cfg,  file_map)
 
-    files = OrderedDict()
-    recurse_config_files(combined_args, files)
-    combined_args.maps.extend(files.values())
+    # recurse the tree and include configures in order of given precedence
+    file_map = OrderedDict()
+    recurse_config_files(combined_args, file_map)
+    combined_args.maps.extend(file_map.values())
+    combined_args.update(config_files=file_map.keys())
     combined_args.maps.append(default_args)
+    combined_args.maps.append(vars(parser.parse_args([])))
 
+    # flatten configuration into most precedence for each argument into given API
     args = argparse.Namespace(**combined_args)
 
     # create logger
