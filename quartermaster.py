@@ -124,17 +124,11 @@ def run(*args):
             'log_file_verbosity': 'debug',
             }
 
-    cfg_parser = argparse.ArgumentParser(add_help=False)
-    cfg_parser.add_argument('-f', '--config-file',
-                           action='store', type=str, default=default_args['config_file'])
-    cfg_args, args = cfg_parser.parse_known_args(args)
-
     parser = argparse.ArgumentParser(
             description='The "Solitude Of War" Discord Bot')
 
-    # noop, but for documentation
     parser.add_argument('-f', '--config-file',
-                        action='store', type=str, default=cfg_parser.get_default('config_file'),
+                        action='store', type=str, default=default_args['config_file'],
                         help=f"""
 Configuration file containing commandline arguments in JSON format; e.g.,'
     {{
@@ -142,7 +136,7 @@ Configuration file containing commandline arguments in JSON format; e.g.,'
         "log_file": "quatermaster.log",
         "verbosity": "warning"
     }}
-                        ; default: {cfg_parser.get_default('config_file')}""")
+                        ; default: {default_args['config_file']}""")
 
 
     token_group = parser.add_mutually_exclusive_group()
@@ -168,10 +162,11 @@ Configuration file containing commandline arguments in JSON format; e.g.,'
                                help='Set log file verbosity; default: debug')
 
     # load defaults from file
+    tmp_args = parser.parse_args(args)
     try:
-        with open(cfg_args.config_file, 'r') as file:
+        with open(tmp_args.config_file, 'r') as file:
             cfg = json.load(file)
-        parser.set_defaults(**cfg, **cfg_args.__dict__)
+        parser.set_defaults(**cfg)
     except FileNotFoundError:
         pass
 
