@@ -72,10 +72,8 @@ async def run_hello(message):
 
 
 async def run_myroles(message):
-    roles_textified = 'Your roles:'
-    for role in message.author.roles:
-        roles_textified = roles_textified + '\n' + role.name.strip('@')
-    await client.send_message(message.channel, roles_textified)
+    roles = '\n\t'.join(role.name.strip('@') for role in message.author.roles)
+    await client.send_message(message.channel, f'Your Roles:\n\t{roles}')
 
 
 async def run_amiadmin(message):
