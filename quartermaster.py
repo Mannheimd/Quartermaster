@@ -115,11 +115,10 @@ async def run_gentlypats(message):
     await client.send_message(message.channel, '*purrs*')
 
 
-def run(*args):
+def run(*args, **kwargs):
     """Run the module level client."""
 
     default_args = {
-            'config_file': 'config.json',
             'token_file': 'api.key',
             'verbosity': 'error',
             'log_file_verbosity': 'debug',
@@ -129,7 +128,8 @@ def run(*args):
             description='The "Solitude Of War" Discord Bot')
 
     parser.add_argument('-f', '--config-file',
-                        action='store', type=str, default=default_args['config_file'],
+                        action='store', type=str,
+                        nargs='?', const='config.json',
                         help=f"""
 Configuration file containing commandline arguments in JSON format; e.g.,'
     {{
@@ -137,7 +137,7 @@ Configuration file containing commandline arguments in JSON format; e.g.,'
         "log_file": "quatermaster.log",
         "verbosity": "warning"
     }}
-                        ; default: {default_args['config_file']}""")
+                        ; default: config.json""")
 
 
     token_group = parser.add_mutually_exclusive_group()
@@ -145,7 +145,7 @@ Configuration file containing commandline arguments in JSON format; e.g.,'
                              action='store', type=str,
                              help='API Token')
     token_group.add_argument('-tf', '--token-file',
-                             action='store', type=str, default=default_args['token_file'],
+                             action='store', type=str,
                              help='File which contains API Token; default: api.key')
 
     logging_group = parser.add_argument_group(
@@ -153,27 +153,29 @@ Configuration file containing commandline arguments in JSON format; e.g.,'
             description='There are various levels of logging, in order of verbosity: '
                         'critical, error, warning, info, debug, noset.')
     logging_group.add_argument('-v', '--verbosity',
-                               action='store', type=str, default=default_args['verbosity'],
+                               action='store', type=str,
                                help='Set verbosity for console output; default: error')
     logging_group.add_argument('-l', '--log-file',
                                action='store', type=str,
                                help='File to log bot status. Not used by default.')
     logging_group.add_argument('-vv', '--log-file-verbosity',
-                               action='store', type=str, default=default_args['log_file_verbosity'],
+                               action='store', type=str,
                                help='Set log file verbosity; default: debug')
 
 
+    parser.set_defaults(**kwargs)
     args = parser.parse_args(args)
     combined_args = ChainMap({k: v for k, v in vars(args).items() if v is not None})
 
-    # load defaults from file
-    try:
-        with open(args.config_file, 'r') as file:
-            cfg = json.load(file)
-            combined_args.maps.append(cfg)
-    except FileNotFoundError:
-        pass
+    def load_config_file(config_file):
+        with open(config_file, 'r') as file:
+            return json.load(file)
 
+    if args.config_file is not None:
+        cfg = load_config_file(args.config_file)
+        combined_args.maps.append(cfg)
+
+    combined_args.maps.append(default_args)
     args = argparse.Namespace(**combined_args)
 
     # create logger
