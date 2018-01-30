@@ -109,7 +109,8 @@ async def run_shutdown(message):
         await client.send_message(message.channel, 'Goodbye')
         raise KeyboardInterrupt()
     else:
-        await client.send_message(message.channel, f"Sorry, I can't let you do that {message.author.mention}.")
+        await client.log.warn(f'{message.author} attempted to shutdown Quatermaster')
+        await client.send_message(message.channel, f'Sorry {message.author.mention}, I cannot let you do that.')
 
 
 async def run_hello(message):
@@ -132,26 +133,33 @@ async def run_amiadmin(message):
 async def run_lightthebeacons(message):
     *_, rolename = message.content.partition(' ')
     if not rolename:
+        client.log.warn(f'{message.author} used invalid input for ?lightthebeacons: "{message.content}"')
         await client.send_message(
                 message.channel,
-                f"I'm sorry {message.author.mention}, I couldn't see a valid role. "
+                f'Sorry {message.author.mention}, I could not see a valid role. '
                 'To light the beacons, use `?lightthebeacons RoleName` without the @ sign on the role. '
                 'Example: `?lightthebeacons Overwatchers`')
         return
 
     role = find(lambda r: rolename == r.name, message.server.roles)
     if role is None:
-        await client.send_message(message.channel, f"I'm sorry {message.author.mention}, I can't find a role called '{rolename}'.")
+        client.log.warn(f'{message.author} tried to mention the non-existent role, "{role}"')
+        await client.send_message(message.channel, f'Sorry {message.author.mention}, I cannot find a role called "{rolename}".')
         return
 
     if not role.mentionable:
-        await client.send_message(message.channel, f"I'm sorry {message.author.mention}, that role can't be @mentioned.")
+        client.log.warn(f'{message.author} tried to mention the unmentionable role, "{role}"')
+        await client.send_message(message.channel, f'Sorry {message.author.mention}, that role cannot be @mentioned.')
         return
 
-    await client.delete_message(message)
-    await client.send_message(
-            message.channel,
-            f"The beacons are lit! {role.mention}, will you come to {message.author.mention}'s aid?")
+    try:
+        await client.delete_message(message)
+        client.log.info("Delete {message.author}'s message, (id: {message.id})")
+    except discord.errors.HTTPException:
+        client.log.error("Could not delete {message.author}'s message, (id: {message.id})")
+
+    await client.send_message(message.channel,
+                              f"The beacons are lit! {role.mention}, will you come to {message.author.mention}'s aid?")
 
 
 async def run_gentlypats(message):
