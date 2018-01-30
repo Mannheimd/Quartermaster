@@ -178,8 +178,8 @@ Configuration file(s) containing commandline arguments in JSON format; e.g.,'
                                action='store', type=str,
                                help='Set verbosity for console output; default: error')
     logging_group.add_argument('-l', '--log-file',
-                               action='store', type=str,
-                               help='File to log bot status. Not used by default.')
+                               action='store', type=str, nargs='?', const='server.log',
+                               help='File to log bot status; default: server.log')
     logging_group.add_argument('-vv', '--log-file-verbosity',
                                action='store', type=str,
                                help='Set log file verbosity; default: debug')
