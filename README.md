@@ -1,4 +1,4 @@
-# Quatermaster
+# Quartermaster
 
 The "Solitude Of War" Discord Bot
 
