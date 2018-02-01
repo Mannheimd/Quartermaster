@@ -6,7 +6,7 @@ import errno
 import itertools as it
 import json
 import logging
-import os
+from pathlib import Path
 import random
 import sys
 import textwrap
@@ -213,9 +213,10 @@ def run(*args, **kwargs):
     """Run the module level client."""
 
     default_args = {
-            'config_files': 'config.json',
+            'config_files': Path('config.json').absolute(),
             'verbosity': 'error',
             'log_file_verbosity': 'debug',
+            'log_file_mode': 'a',
             }
 
     parser = argparse.ArgumentParser(
@@ -231,7 +232,7 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
         "log_file": "quartermaster.log",
         "verbosity": "warning"
     }}
-                        (default: {default_args['config_files']})""")
+                        (default: {default_args['config_files'].name})""")
 
 
     token_group = parser.add_mutually_exclusive_group()
@@ -256,6 +257,9 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
     logging_group.add_argument('-lv', '--log-file-verbosity',
                                choices=logging_levels,
                                help=f'Set log file verbosity. (default: {default_args["log_file_verbosity"]})')
+    logging_group.add_argument('-lm', '--log-file-mode',
+                               choices=('w', 'a'),
+                               help=f'Set mode for log file, (over)write, or append. (default: {default_args["log_file_mode"]})')
 
 
     parser.set_defaults(**kwargs)
@@ -263,22 +267,21 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
 
     # flatten any given configuration files
     if args.config_files is not None:
-        args.config_files = tuple(flatten(args.config_files, default_args['config_files']))
+        filenames = flatten(args.config_files, default_args['config_files'])
+        args.config_files = tuple(Path(filename).absolute() for filename in filenames)
 
     combined_args = ChainMap({}, {k: v for k, v in vars(args).items() if v is not None})
 
-    def load_config_file(config_file):
-        with open(config_file, 'r') as file:
-            return json.load(file)
-
     def recurse_config_files(cfg, file_map):
-        files = cfg.get('config_files')
-        if files is None:
+        paths = cfg.get('config_files')
+        if paths is None:
             return
-        for file in files:
-            if file is not None and file not in file_map:
-                cfg = load_config_file(file)
-                file_map[file] = cfg
+        for path in filter(None, paths):
+            path = Path(path).absolute()
+            if path not in file_map:
+                with path.open() as file:
+                    cfg = json.load(file)
+                file_map[path] = cfg
                 recurse_config_files(cfg,  file_map)
 
     # recurse the tree and include configures in order of given precedence
@@ -309,7 +312,8 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
 
     # optionally with file handle
     if args.log_file:
-        fh = logging.FileHandler(args.log_file, mode='a')
+        args.log_file = Path(args.log_file).absolute()
+        fh = logging.FileHandler(args.log_file, mode=args.log_file_mode)
         fh.setLevel(args.log_file_verbosity)
         fh.setFormatter(fmt)
         logger.addHandler(fh)
@@ -322,11 +326,10 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
             client.log.error(f'No token or token file provided; please indicate a token.')
             parser.print_help()
             exit(errno.EACCES)
-        args.token_file = os.path.abspath(args.token_file)
+        args.token_file = Path(args.token_file).absolute()
         try:
-            with open(args.token_file, 'r') as file:
-                client.log.info(f'Reading API key from {args.token_file}')
-                args.token = file.read().strip()
+            args.token = args.token_file.read_text().strip()
+            client.log.info(f'Reading API key from {args.token_file}')
         except FileNotFoundError:
             client.log.error(f'{args.token_file} cannot be found; please indicate a token.')
             parser.print_help()
