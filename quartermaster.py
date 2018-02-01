@@ -138,11 +138,13 @@ async def run_amiadmin(message):
 
 
 async def run_lightthebeacons(message):
+    pseudo_roles = 'everyone', 'here'
+
     *_, rolename = message.content.partition(' ')
     if not rolename:
         client.log.warn(f'{message.author} used invalid input for ?lightthebeacons: "{message.content}"')
         mentionable = list(filter(lambda r: r.mentionable, message.server.roles))
-        mentionable.extend(('everyone', 'here'))
+        mentionable.extend(pseudo_roles)
         role = random.choice(mentionable)
         await client.send_message(
                 message.channel,
@@ -151,16 +153,22 @@ async def run_lightthebeacons(message):
                 f'Example: `?lightthebeacons {role}`')
         return
 
-    role = find(lambda r: rolename == r.name, message.server.roles)
-    if role is None:
-        client.log.warn(f'{message.author} tried to mention the non-existent role, "{role}"')
-        await client.send_message(message.channel, f'Sorry {message.author.mention}, I cannot find a role called "{rolename}".')
-        return
+    if rolename in pseudo_roles:
+        mention = f'@{rolename}'
+    else:
+        role = find(lambda r: rolename == r.name, message.server.roles)
+        if role is None:
+            client.log.warn(f'{message.author} tried to mention the non-existent role, "{role}"')
+            await client.send_message(message.channel,
+                                     f'Sorry {message.author.mention}, I cannot find a role called "{rolename}".')
+            return
 
-    if not role.mentionable:
-        client.log.warn(f'{message.author} tried to mention the unmentionable role, "{role}"')
-        await client.send_message(message.channel, f'Sorry {message.author.mention}, that role cannot be @mentioned.')
-        return
+        if not role.mentionable:
+            client.log.warn(f'{message.author} tried to mention the unmentionable role, "{role}"')
+            await client.send_message(message.channel, f'Sorry {message.author.mention}, that role cannot be @mentioned.')
+            return
+
+        mention = role.mention
 
     try:
         await client.delete_message(message)
@@ -169,7 +177,7 @@ async def run_lightthebeacons(message):
         client.log.error("Could not delete {message.author}'s message, (id: {message.id})")
 
     await client.send_message(message.channel,
-                              f"The beacons are lit! {role.mention}, will you come to {message.author.mention}'s aid?")
+                              f"The beacons are lit! {mention}, will you come to {message.author.mention}'s aid?")
 
 
 async def run_gentlypats(message):
