@@ -180,10 +180,10 @@ async def run_goodbot(message):
             'You know how to make a bot blush',
             'This is the best day ever!',
             'I do what I can',
-            'You are so kinda!',
+            'You are so kind!',
             )
     response = random.choice(responses)
-    client.send_message(message.channel, f'Gee thanks {message.author.mention}! {response}')
+    await client.send_message(message.channel, f'Gee thanks {message.author.mention}! {response}')
 
 
 async def run_badbot(message):
@@ -195,7 +195,7 @@ async def run_badbot(message):
             'I am not myself today',
             )
     response = random.choice(responses)
-    client.send_message(message.channel, f'Sorry {message.author.mention}, {response}')
+    await client.send_message(message.channel, f'Sorry {message.author.mention}, {response}')
 
 
 def run(*args, **kwargs):
