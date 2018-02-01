@@ -216,6 +216,7 @@ def run(*args, **kwargs):
             'config_files': 'config.json',
             'verbosity': 'error',
             'log_file_verbosity': 'debug',
+            'log_file_mode': 'a',
             }
 
     parser = argparse.ArgumentParser(
@@ -256,6 +257,9 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
     logging_group.add_argument('-lv', '--log-file-verbosity',
                                choices=logging_levels,
                                help=f'Set log file verbosity. (default: {default_args["log_file_verbosity"]})')
+    logging_group.add_argument('-lm', '--log-file-mode',
+                               choices=('w', 'a'),
+                               help=f'Set mode for log file, (over)write, or append. (default: {default_args["log_file_mode"]})')
 
 
     parser.set_defaults(**kwargs)
@@ -309,7 +313,7 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
 
     # optionally with file handle
     if args.log_file:
-        fh = logging.FileHandler(args.log_file, mode='a')
+        fh = logging.FileHandler(args.log_file, mode=args.log_file_mode)
         fh.setLevel(args.log_file_verbosity)
         fh.setFormatter(fmt)
         logger.addHandler(fh)
