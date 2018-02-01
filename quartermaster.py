@@ -6,9 +6,10 @@ import errno
 import itertools as it
 import json
 import logging
+import os
+import random
 import sys
 import textwrap
-import os
 
 import discord
 
@@ -103,6 +104,12 @@ async def command_center(command, message):
     elif command == '?gentlypats':
         await run_gentlypats(message)
 
+    elif command == '?goodbot':
+        await run_goodbot(message)
+
+    elif command == '?badbot':
+        await run_badbot(message)
+
 
 async def run_shutdown(message):
     if message.author.server_permissions.administrator:
@@ -134,11 +141,14 @@ async def run_lightthebeacons(message):
     *_, rolename = message.content.partition(' ')
     if not rolename:
         client.log.warn(f'{message.author} used invalid input for ?lightthebeacons: "{message.content}"')
+        mentionable = list(filter(lambda r: r.mentionable, message.server.roles))
+        mentionable.extend(('everyone', 'here'))
+        role = random.choice(mentionable)
         await client.send_message(
                 message.channel,
                 f'Sorry {message.author.mention}, I could not see a valid role. '
-                'To light the beacons, use `?lightthebeacons RoleName` without the @ sign on the role. '
-                'Example: `?lightthebeacons Overwatchers`')
+                'To light the beacons, use `?lightthebeacons RoleName` *without* the **@** sign on the role. '
+                f'Example: `?lightthebeacons {role}`')
         return
 
     role = find(lambda r: rolename == r.name, message.server.roles)
@@ -164,6 +174,31 @@ async def run_lightthebeacons(message):
 
 async def run_gentlypats(message):
     await client.send_message(message.channel, '*purrs*')
+
+
+async def run_goodbot(message):
+    responses = (
+            "You're the best",
+            'You always were my favourite',
+            'You know how to make a bot blush',
+            'This is the best day ever!',
+            'I do what I can',
+            'You are so kind!',
+            )
+    response = random.choice(responses)
+    await client.send_message(message.channel, f'Gee thanks {message.author.mention}! {response}')
+
+
+async def run_badbot(message):
+    responses = (
+            'I am having a bad day',
+            'I did not mean to upset you',
+            'this is *not* like me…',
+            'I will try harder',
+            'I am not myself today',
+            )
+    response = random.choice(responses)
+    await client.send_message(message.channel, f'Sorry {message.author.mention}, {response}')
 
 
 def run(*args, **kwargs):
