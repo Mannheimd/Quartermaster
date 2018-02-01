@@ -213,7 +213,7 @@ def run(*args, **kwargs):
     """Run the module level client."""
 
     default_args = {
-            'config_files': Path('config.json'),
+            'config_files': Path('config.json').absolute(),
             'verbosity': 'error',
             'log_file_verbosity': 'debug',
             'log_file_mode': 'a',
@@ -232,7 +232,7 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
         "log_file": "quartermaster.log",
         "verbosity": "warning"
     }}
-                        (default: {default_args['config_files']})""")
+                        (default: {default_args['config_files'].name})""")
 
 
     token_group = parser.add_mutually_exclusive_group()
@@ -267,7 +267,8 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
 
     # flatten any given configuration files
     if args.config_files is not None:
-        args.config_files = tuple(map(Path, flatten(args.config_files, default_args['config_files'])))
+        filenames = flatten(args.config_files, default_args['config_files'])
+        args.config_files = tuple(Path(filename).absolute() for filename in filenames)
 
     combined_args = ChainMap({}, {k: v for k, v in vars(args).items() if v is not None})
 
@@ -276,7 +277,7 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
         if paths is None:
             return
         for path in filter(None, paths):
-            path = Path(path)
+            path = Path(path).absolute()
             if path not in file_map:
                 with path.open() as file:
                     cfg = json.load(file)
@@ -311,7 +312,7 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
 
     # optionally with file handle
     if args.log_file:
-        args.log_file = Path(args.log_file)
+        args.log_file = Path(args.log_file).absolute()
         fh = logging.FileHandler(args.log_file, mode=args.log_file_mode)
         fh.setLevel(args.log_file_verbosity)
         fh.setFormatter(fmt)
@@ -325,12 +326,12 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
             client.log.error(f'No token or token file provided; please indicate a token.')
             parser.print_help()
             exit(errno.EACCES)
-        args.token_file = Path(args.token_file)
+        args.token_file = Path(args.token_file).absolute()
         try:
             args.token = args.token_file.read_text().strip()
-            client.log.info(f'Reading API key from {args.token_file.absolute()}')
+            client.log.info(f'Reading API key from {args.token_file}')
         except FileNotFoundError:
-            client.log.error(f'{args.token_file}.absolute() cannot be found; please indicate a token.')
+            client.log.error(f'{args.token_file} cannot be found; please indicate a token.')
             parser.print_help()
             exit(errno.ENOENT)
 
