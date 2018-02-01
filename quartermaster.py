@@ -141,11 +141,14 @@ async def run_lightthebeacons(message):
     *_, rolename = message.content.partition(' ')
     if not rolename:
         client.log.warn(f'{message.author} used invalid input for ?lightthebeacons: "{message.content}"')
+        mentionable = list(filter(lambda r: r.mentionable, message.server.roles))
+        mentionable.extend(('everyone', 'here'))
+        role = random.choice(mentionable)
         await client.send_message(
                 message.channel,
                 f'Sorry {message.author.mention}, I could not see a valid role. '
-                'To light the beacons, use `?lightthebeacons RoleName` without the @ sign on the role. '
-                'Example: `?lightthebeacons Overwatchers`')
+                'To light the beacons, use `?lightthebeacons RoleName` *without* the **@** sign on the role. '
+                f'Example: `?lightthebeacons {role}`')
         return
 
     role = find(lambda r: rolename == r.name, message.server.roles)
