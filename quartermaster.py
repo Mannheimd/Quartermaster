@@ -6,7 +6,7 @@ import errno
 import itertools as it
 import json
 import logging
-import os
+from pathlib import Path
 import random
 import sys
 import textwrap
@@ -213,7 +213,7 @@ def run(*args, **kwargs):
     """Run the module level client."""
 
     default_args = {
-            'config_files': 'config.json',
+            'config_files': Path('config.json'),
             'verbosity': 'error',
             'log_file_verbosity': 'debug',
             'log_file_mode': 'a',
@@ -267,22 +267,20 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
 
     # flatten any given configuration files
     if args.config_files is not None:
-        args.config_files = tuple(flatten(args.config_files, default_args['config_files']))
+        args.config_files = tuple(map(Path, flatten(args.config_files, default_args['config_files'])))
 
     combined_args = ChainMap({}, {k: v for k, v in vars(args).items() if v is not None})
 
-    def load_config_file(config_file):
-        with open(config_file, 'r') as file:
-            return json.load(file)
-
     def recurse_config_files(cfg, file_map):
-        files = cfg.get('config_files')
-        if files is None:
+        paths = cfg.get('config_files')
+        if paths is None:
             return
-        for file in files:
-            if file is not None and file not in file_map:
-                cfg = load_config_file(file)
-                file_map[file] = cfg
+        for path in filter(None, paths):
+            path = Path(path)
+            if path not in file_map:
+                with path.open() as file:
+                    cfg = json.load(file)
+                file_map[path] = cfg
                 recurse_config_files(cfg,  file_map)
 
     # recurse the tree and include configures in order of given precedence
@@ -313,6 +311,7 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
 
     # optionally with file handle
     if args.log_file:
+        args.log_file = Path(args.log_file)
         fh = logging.FileHandler(args.log_file, mode=args.log_file_mode)
         fh.setLevel(args.log_file_verbosity)
         fh.setFormatter(fmt)
@@ -326,13 +325,12 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
             client.log.error(f'No token or token file provided; please indicate a token.')
             parser.print_help()
             exit(errno.EACCES)
-        args.token_file = os.path.abspath(args.token_file)
+        args.token_file = Path(args.token_file)
         try:
-            with open(args.token_file, 'r') as file:
-                client.log.info(f'Reading API key from {args.token_file}')
-                args.token = file.read().strip()
+            args.token = args.token_file.read_text().strip()
+            client.log.info(f'Reading API key from {args.token_file.absolute()}')
         except FileNotFoundError:
-            client.log.error(f'{args.token_file} cannot be found; please indicate a token.')
+            client.log.error(f'{args.token_file}.absolute() cannot be found; please indicate a token.')
             parser.print_help()
             exit(errno.ENOENT)
 
