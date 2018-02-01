@@ -107,6 +107,9 @@ async def command_center(command, message):
     elif command == '?goodbot':
         await run_goodbot(message)
 
+    elif command == '?badbot':
+        await run_badbot(message)
+
 
 async def run_shutdown(message):
     if message.author.server_permissions.administrator:
@@ -181,6 +184,18 @@ async def run_goodbot(message):
             )
     response = random.choice(responses)
     client.send_message(message.channel, f'Gee thanks {message.author.mention}! {response}')
+
+
+async def run_badbot(message):
+    responses = (
+            'I am having a bad day',
+            'I did not mean to upset you',
+            'this is *not* like me…',
+            'I will try harder',
+            'I am not myself today',
+            )
+    response = random.choice(responses)
+    client.send_message(message.channel, f'Sorry {message.author.mention}, {response}')
 
 
 def run(*args, **kwargs):
