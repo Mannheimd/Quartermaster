@@ -19,8 +19,8 @@ class HelpFormatter(argparse.RawDescriptionHelpFormatter):
         return tuple(lines)
 
 
-def run(*args, **kwargs):
-    """Run the module level client."""
+def parse_args(*args, **kwargs):
+    """Parse arguments semantically."""
 
     default_args = {
             'config_files': Path('config.json').absolute(),
@@ -145,6 +145,13 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
             parser.print_help()
             exit(errno.ENOENT)
 
+    return args
+
+
+def run(*args, **kwargs):
+    """Run the module level client."""
+
+    args = parse_args(*args, **kwargs)
     client.run(args.token)
 
 
