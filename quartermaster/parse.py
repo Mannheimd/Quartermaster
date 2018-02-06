@@ -16,15 +16,16 @@ class HelpFormatter(argparse.RawDescriptionHelpFormatter):
         return tuple(lines)
 
 
+default = {
+        'config_files': Path('config.json').absolute(),
+        'verbosity': 'error',
+        'log_file_mode': 'a',
+        'log_file_verbosity': 'debug',
+        }
+
+
 def args(*args, **kwargs):
     """Parse arguments semantically."""
-
-    default_args = {
-            'config_files': Path('config.json').absolute(),
-            'verbosity': 'error',
-            'log_file_mode': 'a',
-            'log_file_verbosity': 'debug',
-            }
 
     parser = argparse.ArgumentParser(
             description='The "Solitude Of War" Discord Bot',
@@ -39,7 +40,7 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
         "verbosity": "warning",
         "log_file": "quartermaster.log"
     }}
-                        (default: {default_args['config_files'].name})""")
+                        (default: {default['config_files'].name})""")
 
 
     token_group = parser.add_mutually_exclusive_group()
@@ -55,16 +56,16 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
             description='There are various levels of logging, in order of verbosity.')
     logging_group.add_argument('-v', '--verbosity',
                                choices=logging.levels,
-                               help=f'Set verbosity for console output. (default: {default_args["verbosity"]})')
+                               help=f'Set verbosity for console output. (default: {default["verbosity"]})')
     logging_group.add_argument('-l', '--log-file',
                                nargs='?', const='server.log',
                                help='File to log bot status. (default: server.log)')
     logging_group.add_argument('-lm', '--log-file-mode',
                                choices=('w', 'a'),
-                               help=f'Set mode for log file, (over)write, or append. (default: {default_args["log_file_mode"]})')
+                               help=f'Set mode for log file, (over)write, or append. (default: {default["log_file_mode"]})')
     logging_group.add_argument('-lv', '--log-file-verbosity',
                                choices=logging.levels,
-                               help=f'Set log file verbosity. (default: {default_args["log_file_verbosity"]})')
+                               help=f'Set log file verbosity. (default: {default["log_file_verbosity"]})')
 
 
     parser.set_defaults(**kwargs)
@@ -72,7 +73,7 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
 
     # flatten any given configuration files
     if args.config_files is not None:
-        filenames = flatten(args.config_files, default_args['config_files'])
+        filenames = flatten(args.config_files, default['config_files'])
         args.config_files = tuple(Path(filename).absolute() for filename in filenames)
 
     combined_args = ChainMap({}, {k: v for k, v in vars(args).items() if v is not None})
@@ -94,7 +95,7 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
     recurse_config_files(combined_args, file_map)
     combined_args.maps.extend(file_map.values())
     combined_args.update(config_files=file_map.keys())
-    combined_args.maps.append(default_args)
+    combined_args.maps.append(default)
     combined_args.maps.append(vars(parser.parse_args([])))
 
     # flatten configuration into most precedence for each argument into given API
