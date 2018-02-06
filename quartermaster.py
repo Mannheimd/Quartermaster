@@ -4,47 +4,13 @@ import argparse
 from collections import ChainMap, OrderedDict
 import errno
 import json
-import logging
 from pathlib import Path
 import sys
 import textwrap
 
-from quartermaster.utils import flatten
 from quartermaster.client import client
-
-
-logging_levels = OrderedDict((lvl, getattr(logging, lvl.upper()))
-                             for lvl in ('critical', 'error', 'warning', 'info', 'debug'))
-
-
-def create_log_file(log_file,
-                    log_file_mode='a',
-                    log_file_verbosity=logging_levels['debug']):
-        fh = logging.FileHandler(log_file, mode=log_file_mode)
-        fh.setLevel(log_file_verbosity)
-        return fh
-
-
-def create_logger(verbosity=logging_levels['error'], log_file=None):
-    """Create a logger which streams to the console, and optionally a file."""
-
-    # create/get logger for this instance
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging_levels['debug'])
-    fmt = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-
-    # with stream (console) handle
-    ch = logging.StreamHandler()
-    ch.setLevel(verbosity)
-    ch.setFormatter(fmt)
-    logger.addHandler(ch)
-
-    # optionally with file handle
-    if log_file:
-        log_file.setFormatter(fmt)
-        logger.addHandler(log_file)
-
-    return logger
+from quartermaster import logging
+from quartermaster.utils import flatten
 
 
 class HelpFormatter(argparse.RawDescriptionHelpFormatter):
@@ -91,7 +57,7 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
             title='logging',
             description='There are various levels of logging, in order of verbosity.')
     logging_group.add_argument('-v', '--verbosity',
-                               choices=logging_levels,
+                               choices=logging.levels,
                                help=f'Set verbosity for console output. (default: {default_args["verbosity"]})')
     logging_group.add_argument('-l', '--log-file',
                                nargs='?', const='server.log',
@@ -100,7 +66,7 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
                                choices=('w', 'a'),
                                help=f'Set mode for log file, (over)write, or append. (default: {default_args["log_file_mode"]})')
     logging_group.add_argument('-lv', '--log-file-verbosity',
-                               choices=logging_levels,
+                               choices=logging.levels,
                                help=f'Set log file verbosity. (default: {default_args["log_file_verbosity"]})')
 
 
@@ -138,8 +104,8 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
     args = argparse.Namespace(**combined_args)
 
     # get verbosity 'Enum'
-    args.verbosity = logging_levels[args.verbosity]
-    args.log_file_verbosity = logging_levels[args.log_file_verbosity]
+    args.verbosity = logging.levels[args.verbosity]
+    args.log_file_verbosity = logging.levels[args.log_file_verbosity]
     if args.log_file:
         args.log_file = Path(args.log_file).absolute()
 
@@ -155,11 +121,11 @@ def run(*args, **kwargs):
     args, usage_text, help_text = parse_args(*args, **kwargs)
 
     # inject logger into client
-    client.log = create_logger(
+    client.log = logging.logger(
             args.verbosity,
-            create_log_file(args.log_file,
-                            args.log_file_mode,
-                            args.log_file_verbosity))
+            logging.log_file(args.log_file,
+                             args.log_file_mode,
+                             args.log_file_verbosity))
 
     if args.token is None:
         if args.token_file is None:
