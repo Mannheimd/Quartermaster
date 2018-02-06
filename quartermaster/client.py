@@ -5,7 +5,7 @@ import random
 
 import discord
 
-from utils import find
+from .utils import find
 
 
 class Client(discord.Client):

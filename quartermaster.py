@@ -9,8 +9,8 @@ from pathlib import Path
 import sys
 import textwrap
 
-from utils import flatten
-from client import client
+from quartermaster.utils import flatten
+from quartermaster.client import client
 
 
 logging_levels = OrderedDict((lvl, getattr(logging, lvl.upper()))
