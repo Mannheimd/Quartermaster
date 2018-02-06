@@ -2,13 +2,30 @@
 
 The "Solitude Of War" Discord Bot
 
+You can install `quartermaster` directly using `pip` and `git`:
+
+    # pip install git+https://github.com/Mannheimd/Quartermaster.git
+
+If you do not have `git`, then download a release, and you can install
+it manually:
+
+    # pip install /path/to/release
+
+If you intend to to develop on the codebase, it is suggested to clone
+the repository and install it using the `-e` or `--editable` flags:
+
+    # pip install -e /path/to/repository
+
+You will require a Discord API key; please follow the
+[Discord Developer Documentation](https://discordapp.com/developers)
+for further information.
+
 
 ```
-usage: quartermaster.py [-h] [-f [CONFIG_FILES [CONFIG_FILES ...]]]
-                        [-t TOKEN | -tf [TOKEN_FILE]]
-                        [-v {critical,error,warning,info,debug}]
-                        [-l [LOG_FILE]] [-lm {w,a}]
-                        [-lv {critical,error,warning,info,debug}]
+usage: quartermaster [-h] [-f [CONFIG_FILES [CONFIG_FILES ...]]]
+                     [-t TOKEN | -tf [TOKEN_FILE]]
+                     [-v {critical,error,warning,info,debug}] [-l [LOG_FILE]]
+                     [-lm {w,a}] [-lv {critical,error,warning,info,debug}]
 
 The "Solitude Of War" Discord Bot
 
