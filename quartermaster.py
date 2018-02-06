@@ -13,13 +13,17 @@ from utils import flatten
 from client import client
 
 
-def create_logger(verbosity=logging.ERROR,
-                  log_file=None, log_file_mode='a', log_file_verbosity=logging.DEBUG):
+logging_levels = OrderedDict((lvl, getattr(logging, lvl.upper()))
+                             for lvl in ('critical', 'error', 'warning', 'info', 'debug'))
+
+
+def create_logger(verbosity=logging_levels['error'],
+                  log_file=None, log_file_mode='a', log_file_verbosity=logging_levels['debug']):
     """Create a logger which streams to the console, and optionally a file."""
 
     # create/get logger for this instance
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging_levels['debug'])
     fmt = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
     # with stream (console) handle
@@ -78,8 +82,6 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
                              help='File which contains API Token. (default: api.key)')
 
 
-    logging_levels = OrderedDict((lvl, getattr(logging, lvl.upper()))
-                                 for lvl in ('critical', 'error', 'warning', 'info', 'debug'))
     logging_group = parser.add_argument_group(
             title='logging',
             description='There are various levels of logging, in order of verbosity.')
