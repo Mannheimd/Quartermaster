@@ -13,6 +13,30 @@ from utils import flatten
 from client import client
 
 
+def create_logger(args):
+
+    # create/get logger for this instance
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    fmt = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+    # with stream (console) handle
+    ch = logging.StreamHandler()
+    ch.setLevel(args.verbosity)
+    ch.setFormatter(fmt)
+    logger.addHandler(ch)
+
+    # optionally with file handle
+    if args.log_file:
+        args.log_file = Path(args.log_file).absolute()
+        fh = logging.FileHandler(args.log_file, mode=args.log_file_mode)
+        fh.setLevel(args.log_file_verbosity)
+        fh.setFormatter(fmt)
+        logger.addHandler(fh)
+
+    return logger
+
+
 class HelpFormatter(argparse.RawDescriptionHelpFormatter):
     def _split_lines(self, text, width):
         lines = flatten(textwrap.wrap(t, width) for t in text.splitlines())
@@ -105,31 +129,12 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
     # flatten configuration into most precedence for each argument into given API
     args = argparse.Namespace(**combined_args)
 
-    # create logger
-    logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
-    fmt = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-
     # get verbosity 'Enum'
     args.verbosity = logging_levels[args.verbosity]
     args.log_file_verbosity = logging_levels[args.log_file_verbosity]
 
-    # with stream (console) handle
-    ch = logging.StreamHandler()
-    ch.setLevel(args.verbosity)
-    ch.setFormatter(fmt)
-    logger.addHandler(ch)
-
-    # optionally with file handle
-    if args.log_file:
-        args.log_file = Path(args.log_file).absolute()
-        fh = logging.FileHandler(args.log_file, mode=args.log_file_mode)
-        fh.setLevel(args.log_file_verbosity)
-        fh.setFormatter(fmt)
-        logger.addHandler(fh)
-
     # inject logger into client
-    client.log = logger
+    client.log = create_logger(args)
 
     if args.token is None:
         if args.token_file is None:
