@@ -35,5 +35,9 @@ def run(*args, **kwargs):
     client.run(args.token)
 
 
-if __name__ == '__main__':
+def main():
     run(*sys.argv[1:])
+
+
+if __name__ == '__main__':
+    main()
