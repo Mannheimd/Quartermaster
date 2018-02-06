@@ -17,8 +17,15 @@ logging_levels = OrderedDict((lvl, getattr(logging, lvl.upper()))
                              for lvl in ('critical', 'error', 'warning', 'info', 'debug'))
 
 
-def create_logger(verbosity=logging_levels['error'],
-                  log_file=None, log_file_mode='a', log_file_verbosity=logging_levels['debug']):
+def create_log_file(log_file,
+                    log_file_mode='a',
+                    log_file_verbosity=logging_levels['debug']):
+        fh = logging.FileHandler(log_file, mode=log_file_mode)
+        fh.setLevel(log_file_verbosity)
+        return fh
+
+
+def create_logger(verbosity=logging_levels['error'], log_file=None):
     """Create a logger which streams to the console, and optionally a file."""
 
     # create/get logger for this instance
@@ -34,10 +41,8 @@ def create_logger(verbosity=logging_levels['error'],
 
     # optionally with file handle
     if log_file:
-        fh = logging.FileHandler(log_file, mode=log_file_mode)
-        fh.setLevel(log_file_verbosity)
-        fh.setFormatter(fmt)
-        logger.addHandler(fh)
+        log_file.setFormatter(fmt)
+        logger.addHandler(log_file)
 
     return logger
 
@@ -150,8 +155,11 @@ def run(*args, **kwargs):
     args, usage_text, help_text = parse_args(*args, **kwargs)
 
     # inject logger into client
-    client.log = create_logger(args.verbosity,
-                               args.log_file, args.log_file_mode, args.log_file_verbosity)
+    client.log = create_logger(
+            args.verbosity,
+            create_log_file(args.log_file,
+                            args.log_file_mode,
+                            args.log_file_verbosity))
 
     if args.token is None:
         if args.token_file is None:
