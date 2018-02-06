@@ -135,6 +135,17 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
     if args.log_file:
         args.log_file = Path(args.log_file).absolute()
 
+    if args.token_file:
+        args.token_file = Path(args.token_file).absolute()
+
+    return args, parser.format_usage(), parser.format_help()
+
+
+def run(*args, **kwargs):
+    """Run the module level client."""
+
+    args, usage_text, help_text = parse_args(*args, **kwargs)
+
     # inject logger into client
     client.log = create_logger(args.verbosity,
                                args.log_file, args.log_file_mode, args.log_file_verbosity)
@@ -142,24 +153,16 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
     if args.token is None:
         if args.token_file is None:
             client.log.error(f'No token or token file provided; please indicate a token.')
-            parser.print_help()
+            print(help_text)
             exit(errno.EACCES)
-        args.token_file = Path(args.token_file).absolute()
         try:
             args.token = args.token_file.read_text().strip()
             client.log.info(f'Reading API key from {args.token_file}')
         except FileNotFoundError:
             client.log.error(f'{args.token_file} cannot be found; please indicate a token.')
-            parser.print_help()
+            print(help_text)
             exit(errno.ENOENT)
 
-    return args
-
-
-def run(*args, **kwargs):
-    """Run the module level client."""
-
-    args = parse_args(*args, **kwargs)
     client.run(args.token)
 
 
