@@ -13,7 +13,8 @@ from utils import flatten
 from client import client
 
 
-def create_logger(args):
+def create_logger(verbosity=logging.ERROR,
+                  log_file=None, log_file_mode='a', log_file_verbosity=logging.DEBUG):
 
     # create/get logger for this instance
     logger = logging.getLogger(__name__)
@@ -22,15 +23,14 @@ def create_logger(args):
 
     # with stream (console) handle
     ch = logging.StreamHandler()
-    ch.setLevel(args.verbosity)
+    ch.setLevel(verbosity)
     ch.setFormatter(fmt)
     logger.addHandler(ch)
 
     # optionally with file handle
-    if args.log_file:
-        args.log_file = Path(args.log_file).absolute()
-        fh = logging.FileHandler(args.log_file, mode=args.log_file_mode)
-        fh.setLevel(args.log_file_verbosity)
+    if log_file:
+        fh = logging.FileHandler(log_file, mode=log_file_mode)
+        fh.setLevel(log_file_verbosity)
         fh.setFormatter(fmt)
         logger.addHandler(fh)
 
@@ -49,8 +49,8 @@ def parse_args(*args, **kwargs):
     default_args = {
             'config_files': Path('config.json').absolute(),
             'verbosity': 'error',
-            'log_file_verbosity': 'debug',
             'log_file_mode': 'a',
+            'log_file_verbosity': 'debug',
             }
 
     parser = argparse.ArgumentParser(
@@ -63,8 +63,8 @@ def parse_args(*args, **kwargs):
 Configuration file(s) containing command line arguments in JSON format; e.g.,'
     {{
         "token_file": "quartermaster.key",
-        "log_file": "quartermaster.log",
-        "verbosity": "warning"
+        "verbosity": "warning",
+        "log_file": "quartermaster.log"
     }}
                         (default: {default_args['config_files'].name})""")
 
@@ -88,12 +88,12 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
     logging_group.add_argument('-l', '--log-file',
                                nargs='?', const='server.log',
                                help='File to log bot status. (default: server.log)')
-    logging_group.add_argument('-lv', '--log-file-verbosity',
-                               choices=logging_levels,
-                               help=f'Set log file verbosity. (default: {default_args["log_file_verbosity"]})')
     logging_group.add_argument('-lm', '--log-file-mode',
                                choices=('w', 'a'),
                                help=f'Set mode for log file, (over)write, or append. (default: {default_args["log_file_mode"]})')
+    logging_group.add_argument('-lv', '--log-file-verbosity',
+                               choices=logging_levels,
+                               help=f'Set log file verbosity. (default: {default_args["log_file_verbosity"]})')
 
 
     parser.set_defaults(**kwargs)
@@ -132,9 +132,12 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
     # get verbosity 'Enum'
     args.verbosity = logging_levels[args.verbosity]
     args.log_file_verbosity = logging_levels[args.log_file_verbosity]
+    if args.log_file:
+        args.log_file = Path(args.log_file).absolute()
 
     # inject logger into client
-    client.log = create_logger(args)
+    client.log = create_logger(args.verbosity,
+                               args.log_file, args.log_file_mode, args.log_file_verbosity)
 
     if args.token is None:
         if args.token_file is None:
