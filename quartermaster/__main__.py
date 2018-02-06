@@ -3,8 +3,8 @@
 import errno
 import sys
 
-from quartermaster.client import client
-from quartermaster import logging, parse
+from .client import client
+from . import logging, parse
 
 
 def run(*args, **kwargs):
