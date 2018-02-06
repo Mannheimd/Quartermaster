@@ -24,9 +24,7 @@ default = {
         }
 
 
-def args(*args, **kwargs):
-    """Parse arguments semantically."""
-
+def argument_parser(**kwargs):
     parser = argparse.ArgumentParser(
             description='The "Solitude Of War" Discord Bot',
             formatter_class=HelpFormatter)
@@ -67,8 +65,14 @@ Configuration file(s) containing command line arguments in JSON format; e.g.,'
                                choices=logging.levels,
                                help=f'Set log file verbosity. (default: {default["log_file_verbosity"]})')
 
-
     parser.set_defaults(**kwargs)
+    return parser
+
+
+def args(*args, **kwargs):
+    """Parse arguments semantically."""
+
+    parser = argument_parser(**kwargs)
     args = parser.parse_args(args)
 
     # flatten any given configuration files
