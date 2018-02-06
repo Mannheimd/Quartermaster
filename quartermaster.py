@@ -15,6 +15,7 @@ from client import client
 
 def create_logger(verbosity=logging.ERROR,
                   log_file=None, log_file_mode='a', log_file_verbosity=logging.DEBUG):
+    """Create a logger which streams to the console, and optionally a file."""
 
     # create/get logger for this instance
     logger = logging.getLogger(__name__)

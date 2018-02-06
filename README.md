@@ -7,8 +7,8 @@ The "Solitude Of War" Discord Bot
 usage: quartermaster.py [-h] [-f [CONFIG_FILES [CONFIG_FILES ...]]]
                         [-t TOKEN | -tf [TOKEN_FILE]]
                         [-v {critical,error,warning,info,debug}]
-                        [-l [LOG_FILE]]
-                        [-lv {critical,error,warning,info,debug}] [-lm {w,a}]
+                        [-l [LOG_FILE]] [-lm {w,a}]
+                        [-lv {critical,error,warning,info,debug}]
 
 The "Solitude Of War" Discord Bot
 
@@ -19,8 +19,8 @@ optional arguments:
                         arguments in JSON format; e.g.,'
                             {
                                 "token_file": "quartermaster.key",
-                                "log_file": "quartermaster.log",
-                                "verbosity": "warning"
+                                "verbosity": "warning",
+                                "log_file": "quartermaster.log"
                             }
                                                 (default: config.json)
   -t TOKEN, --token TOKEN
@@ -35,9 +35,9 @@ logging:
                         Set verbosity for console output. (default: error)
   -l [LOG_FILE], --log-file [LOG_FILE]
                         File to log bot status. (default: server.log)
-  -lv {critical,error,warning,info,debug}, --log-file-verbosity {critical,error,warning,info,debug}
-                        Set log file verbosity. (default: debug)
   -lm {w,a}, --log-file-mode {w,a}
                         Set mode for log file, (over)write, or append.
                         (default: a)
+  -lv {critical,error,warning,info,debug}, --log-file-verbosity {critical,error,warning,info,debug}
+                        Set log file verbosity. (default: debug)
 ```
