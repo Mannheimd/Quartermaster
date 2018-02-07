@@ -4,8 +4,9 @@ import json
 from pathlib import Path
 import textwrap
 
-from quartermaster.utils import flatten
-from quartermaster import logging
+from .meta import __version__
+from .utils import flatten
+from . import logging
 
 
 class HelpFormatter(argparse.RawDescriptionHelpFormatter):
@@ -26,6 +27,10 @@ def argument_parser(**kwargs):
     parser = argparse.ArgumentParser(
             description='The "Solitude Of War" Discord Bot',
             formatter_class=HelpFormatter)
+
+    parser.add_argument('-V', '--version',
+                        action='version', version=f'%(prog)s {__version__}',
+                        help='Print version of program')
 
     parser.add_argument('-f', '--config-files',
                         action='append', nargs='*',

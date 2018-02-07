@@ -22,7 +22,7 @@ for further information.
 
 
 ```
-usage: quartermaster [-h] [-f [CONFIG_FILES [CONFIG_FILES ...]]]
+usage: quartermaster [-h] [-V] [-f [CONFIG_FILES [CONFIG_FILES ...]]]
                      [-t TOKEN | -tf [TOKEN_FILE]]
                      [-v {critical,error,warning,info,debug}] [-l [LOG_FILE]]
                      [-lm {w,a}] [-lv {critical,error,warning,info,debug}]
@@ -31,6 +31,7 @@ The "Solitude Of War" Discord Bot
 
 optional arguments:
   -h, --help            show this help message and exit
+  -V, --version         Print version of program
   -f [CONFIG_FILES [CONFIG_FILES ...]], --config-files [CONFIG_FILES [CONFIG_FILES ...]]
                         Configuration file(s) containing command line
                         arguments in JSON format; e.g.,'
