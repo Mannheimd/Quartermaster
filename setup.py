@@ -1,20 +1,24 @@
+import importlib
 from setuptools import find_packages, setup
 
+package = 'quartermaster'
+meta = importlib.import_module('.meta', package)
+
 setup(
-    name='quartermaster',
-    version='0.3.0-dev',
+    name=package,
+    version=meta.__version__,
     packages=find_packages(),
 
     python_requires='~=3.6',
     install_requires=['discord.py>=0.15.0'],
 
     entry_points={
-        'console_scripts': ['quartermaster = quartermaster:main'],
+        'console_scripts': [f'{package} = {package}:main'],
     },
 
-    author='Christopher Manders, Matthew Parnell',
-    author_email='cmanders159@gmail.com, matt@parnmatt.co.uk',
+    author=meta.__author__,
+    author_email=meta.__email__,
     description='The "Solitude Of War" Discord bot',
-    license='MIT',
+    license=meta.__license__,
     url='https://github.com/Mannheimd/Quartermaster',
 )

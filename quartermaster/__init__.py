@@ -3,6 +3,7 @@ import sys
 
 from .client import client
 from . import logging, parse
+from .meta import *
 
 
 def run(*args, **kwargs):
