@@ -10,13 +10,15 @@ def run(*args, **kwargs):
     """Run the module level client."""
 
     args, usage_text, help_text = parse.args(*args, **kwargs)
+    
+    log_file = None
+    if args.log_file:
+        log_file = logging.log_file(args.log_file,
+                                    args.log_file_mode,
+                                    args.log_file_verbosity)
 
     # inject logger into client
-    client.log = logging.logger(
-            args.verbosity,
-            logging.log_file(args.log_file,
-                             args.log_file_mode,
-                             args.log_file_verbosity))
+    client.log = logging.logger(args.verbosity, log_file)
 
     if args.token is None:
         if args.token_file is None:
