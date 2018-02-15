@@ -49,6 +49,9 @@ async def command_center(command, message):
     elif command == '?amiadmin':
         await run_amiadmin(message)
 
+    elif command == '?ltb':
+        await run_lightthebeacons(message)
+
     elif command == '?lightthebeacons':
         await run_lightthebeacons(message)
 
