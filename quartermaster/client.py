@@ -172,11 +172,12 @@ async def run_nomancandefeatme(message):
     
     
 async def run_justapoorboy(message):
-    with open('bohemian_rhapsody.txt') as f:
-        lyrics = f.readlines()
-    lyrics = [x.strip() for x in lyrics]
-    for line in lyrics:
-        if line != '':
-            await client.send_message(message.author, line)
-        time.sleep(1)
+    with open('bohemian_rhapsody.txt') as file:
+        for line in file:
+            line = line.strip()
+            if line == '':
+                await client.send_message(message.author, '~')
+            else:
+                await client.send_message(message.author, line)
+            time.sleep(1)        
         
