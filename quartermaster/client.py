@@ -1,5 +1,6 @@
 import logging
 import random
+import time
 
 import discord
 
@@ -63,6 +64,9 @@ async def command_center(command, message):
 
     elif command == '?nomancandefeatme':
         await run_nomancandefeatme(message)
+
+    elif command == '?justapoorboy':
+        await run_justapoorboy(message)
 
 
 async def run_shutdown(message):
@@ -165,3 +169,13 @@ async def run_badbot(message):
     
 async def run_nomancandefeatme(message):
     await client.send_message(message.channel, 'I am no man.')
+    
+    
+async def run_justapoorboy(message):
+    with open('bohemian_rhapsody.txt') as f:
+        lyrics = f.readlines()
+    lyrics = [x.strip() for x in lyrics]
+    for line in lyrics:
+        if line != '':
+            await client.send_message(message.author, line)
+        time.sleep(1)
