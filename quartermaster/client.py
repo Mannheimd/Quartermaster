@@ -61,6 +61,9 @@ async def command_center(command, message):
     elif command == '?badbot':
         await run_badbot(message)
 
+    elif command == '?nomancandefeatme':
+        await run_nomancandefeatme(message)
+
 
 async def run_shutdown(message):
     if message.author.server_permissions.administrator:
@@ -158,3 +161,7 @@ async def run_badbot(message):
             )
     response = random.choice(responses)
     await client.send_message(message.channel, f'Sorry {message.author.mention}, {response}')
+
+    
+async def run_nomancandefeatme(message):
+    await client.send_message(message.channel, 'I am no man.')
