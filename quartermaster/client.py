@@ -179,3 +179,4 @@ async def run_justapoorboy(message):
         if line != '':
             await client.send_message(message.author, line)
         time.sleep(1)
+        
