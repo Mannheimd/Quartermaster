@@ -179,5 +179,4 @@ async def run_justapoorboy(message):
                 await client.send_message(message.author, '~')
             else:
                 await client.send_message(message.author, line)
-            time.sleep(1)        
-        
+            time.sleep(1)
